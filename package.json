@@ -1,13 +1,12 @@
 {
   "name": "react-media-recorder",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description":
-    "A React component based on MediaRecorder() API to record audio/video ",
+    "A React component based on MediaRecorder() API to record audio/video streams",
   "main": "index.js",
   "scripts": {
     "build": "rollup -c",
-    "postinstall": "npm run build",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "postinstall": "npm run build"
   },
   "repository": {
     "type": "git",
@@ -15,11 +14,10 @@
   },
   "keywords": [
     "react",
-    "voice",
     "recorder",
-    "video",
-    "recorder",
-    "mediarecorder"
+    "audio recorder",
+    "video recorder",
+    "media recorder"
   ],
   "author": "Giridharan GM",
   "license": "MIT",
