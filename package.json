@@ -1,10 +1,12 @@
 {
   "name": "react-media-recorder",
   "version": "0.1.0",
-  "description": "A React component based on MediaRecorder() API to record audio/video ",
+  "description":
+    "A React component based on MediaRecorder() API to record audio/video ",
   "main": "index.js",
   "scripts": {
     "build": "rollup -c",
+    "postinstall": "npm run build",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
@@ -29,11 +31,13 @@
     "babel": "^6.23.0",
     "babel-cli": "^6.26.0",
     "babel-plugin-external-helpers": "^6.22.0",
+    "babel-plugin-transform-class-properties": "^6.24.1",
     "babel-preset-env": "^1.6.1",
     "babel-preset-react": "^6.24.1",
     "prop-types": "^15.6.1",
     "react": "^16.3.2",
     "rollup": "^0.58.2",
-    "rollup-plugin-babel": "^3.0.4"
+    "rollup-plugin-babel": "^3.0.4",
+    "rollup-plugin-uglify": "^3.0.0"
   }
 }
