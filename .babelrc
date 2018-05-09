@@ -1,4 +1,15 @@
 {
-  "presets": [["env", { "modules": false }], "react"],
+  "presets": [
+    [
+      "env",
+      {
+        "modules": false,
+        "targets": {
+          "browsers": ["last 2 Chrome versions"]
+        }
+      }
+    ],
+    "react"
+  ],
   "plugins": ["external-helpers", "transform-class-properties"]
 }
