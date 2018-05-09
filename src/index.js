@@ -15,7 +15,8 @@ export default class ReactMediaRecorder extends React.Component {
   };
 
   static defaultProps = {
-    audio: true
+    audio: true,
+    render: () => null
   };
 
   constructor(props) {
