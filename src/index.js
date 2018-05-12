@@ -37,8 +37,10 @@ export default class ReactMediaRecorder extends React.Component {
   }
 
   componentDidMount = async () => {
-    this.stream = await this.getMediaStream();
-    if (!this.stream) {
+    const stream = await this.getMediaStream();
+    if (stream) {
+      this.stream = stream;
+    } else {
       this.setState({ status: "permission_denied" });
     }
   };
@@ -89,9 +91,24 @@ export default class ReactMediaRecorder extends React.Component {
     this.setState({ status: "recording" });
   };
 
+  pauseRecording = () => {
+    if (this.mediaRecorder && this.mediaRecorder.state === "recording") {
+      this.setState({ status: "paused" });
+      this.mediaRecorder.pause();
+    }
+  };
+
+  resumeRecording = () => {
+    if (this.mediaRecorder && this.mediaRecorder.state === "paused") {
+      this.setState({ status: "recording" });
+      this.mediaRecorder.resume();
+    }
+  };
+
   stopRecording = () => {
     if (this.mediaRecorder && this.mediaRecorder.state !== "inactive") {
       this.mediaRecorder.stop();
+      this.mediaRecorder = null;
       this.setState({ status: "stopped" });
     }
   };
@@ -101,6 +118,8 @@ export default class ReactMediaRecorder extends React.Component {
       status: this.state.status,
       startRecording: this.startRecording,
       stopRecording: this.stopRecording,
+      pauseRecording: this.pauseRecording,
+      resumeRecording: this.resumeRecording,
       mediaBlob: this.state.mediaBlob
     });
 }
