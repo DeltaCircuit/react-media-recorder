@@ -109,7 +109,7 @@ if there's only `audio` is enabled,
 
 Whether you want to mute the audio (while recording video)
 
-type: `object`  
+type: `boolean`  
 default: `false`  
 
 #### render
