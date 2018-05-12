@@ -40,16 +40,9 @@ export default class ReactMediaRecorder extends React.Component {
     let {
       audio,
       video,
-      muted,
       blobPropertyBag = video ? { type: "video/mp4" } : { type: "audio/wav" }
     } = props;
 
-    // We can blindly set audio != muted. But then the getMediaStream() won't work (no audio/video) and will throw an error.
-    // So we simply ignore the mute all the time except video is enabled.
-    // The PropType will throw an error just in case if audio and muted are both enabled.
-    if (video && muted) {
-      audio = false;
-    }
     this.requiredMedia = {
       audio: typeof audio === "boolean" ? !!audio : audio,
       video: typeof video === "boolean" ? !!video : video
@@ -60,9 +53,18 @@ export default class ReactMediaRecorder extends React.Component {
   componentDidMount = async () => {
     const stream = await this.getMediaStream();
     if (stream) {
+      let [audioTrack] = stream.getAudioTracks();
+      audioTrack.enabled = !this.props.muted;
       this.stream = stream;
     } else {
       this.setState({ status: "permission_denied" });
+    }
+  };
+
+  componentDidUpdate = prevProps => {
+    if (prevProps.muted !== this.props.muted) {
+      let [audioTrack] = this.stream.getAudioTracks();
+      audioTrack.enabled = !this.props.muted;
     }
   };
 
