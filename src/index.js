@@ -10,13 +10,13 @@ export default class ReactMediaRecorder extends React.Component {
   static propTypes = {
     audio: PropTypes.oneOfType([PropTypes.bool, PropTypes.object]),
     video: PropTypes.oneOfType([PropTypes.bool, PropTypes.object]),
-    muted: ({ muted, audio }) => {
+    muted: ({ muted, audio, video }) => {
       if (typeof muted !== "boolean") {
         return new Error(
           `Invalid prop: muted should be a boolan value. Please check your react-media-recorder component declaration`
         );
       }
-      if (muted && audio) {
+      if (muted && (audio && !video)) {
         return new Error(
           `It looks like you tried to mute as well as record audio. Please check your react-media-recorder component declaration`
         );
@@ -43,6 +43,10 @@ export default class ReactMediaRecorder extends React.Component {
       muted,
       blobPropertyBag = video ? { type: "video/mp4" } : { type: "audio/wav" }
     } = props;
+
+    // We can blindly set audio != muted. But then the getMediaStream() won't work (no audio/video) and will throw an error.
+    // So we simply ignore the mute all the time except video is enabled.
+    // The PropType will throw an error just in case if audio and muted are both enabled.
     if (video && muted) {
       audio = false;
     }
