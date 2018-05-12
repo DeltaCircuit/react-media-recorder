@@ -5,5 +5,5 @@ export default {
   input: "src/index.js",
   output: { file: "lib/index.js", format: "cjs" },
   plugins: [babel({ exclude: "node_modules/**" }), uglify()],
-  external: ["react"]
+  external: ["react", "prop-types"]
 };

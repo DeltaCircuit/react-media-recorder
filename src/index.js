@@ -10,12 +10,25 @@ export default class ReactMediaRecorder extends React.Component {
   static propTypes = {
     audio: PropTypes.oneOfType([PropTypes.bool, PropTypes.object]),
     video: PropTypes.oneOfType([PropTypes.bool, PropTypes.object]),
+    muted: ({ muted, audio }) => {
+      if (typeof muted !== "boolean") {
+        return new Error(
+          `Invalid prop: muted should be a boolan value. Please check your react-media-recorder component declaration`
+        );
+      }
+      if (muted && audio) {
+        return new Error(
+          `It looks like you tried to mute as well as record audio. Please check your react-media-recorder component declaration`
+        );
+      }
+    },
     render: PropTypes.func.isRequired,
     blobPropertyBag: PropTypes.object
   };
 
   static defaultProps = {
     audio: true,
+    muted: false,
     render: () => null
   };
 
@@ -24,11 +37,15 @@ export default class ReactMediaRecorder extends React.Component {
     if (!window.MediaRecorder) {
       throw new Error("React Media Recorder: Unsupported browser");
     }
-    const {
+    let {
       audio,
       video,
+      muted,
       blobPropertyBag = video ? { type: "video/mp4" } : { type: "audio/wav" }
     } = props;
+    if (video && muted) {
+      audio = false;
+    }
     this.requiredMedia = {
       audio: typeof audio === "boolean" ? !!audio : audio,
       video: typeof video === "boolean" ? !!video : video

@@ -105,6 +105,13 @@ if there's only `audio` is enabled,
 }
 ```
 
+#### muted
+
+Whether you want to mute the audio (while recording video)
+
+type: `object`  
+default: `false`  
+
 #### render
 
 A `function` which accepts an object containing fields: `status`, `startRecording`, `stopRecording` and`mediaBlob`. This function would return a react element/component.
