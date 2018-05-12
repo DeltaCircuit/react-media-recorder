@@ -47,17 +47,18 @@ A string `enum`. Possible values:
 * `idle`
 * `permission_denied`
 * `recording`
+* `paused`
 * `stopped`
 
 #### startRecording
 
-A `function`, which starts recording when invoked.  
+A `function`, which starts recording when invoked.
 
-#### pauseRecording  
+#### pauseRecording
 
-A `function`, which pauses the recording when invoked.  
+A `function`, which pauses the recording when invoked.
 
-#### resumeRecording  
+#### resumeRecording
 
 A `function`, which resumes the recording when invoked.
 
