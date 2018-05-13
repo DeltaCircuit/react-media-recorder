@@ -10,6 +10,7 @@ export default class ReactMediaRecorder extends React.Component {
   static propTypes = {
     audio: PropTypes.oneOfType([PropTypes.bool, PropTypes.object]),
     video: PropTypes.oneOfType([PropTypes.bool, PropTypes.object]),
+    delay: PropTypes.number,
     muted: ({ muted, audio, video }) => {
       if (typeof muted !== "boolean") {
         return new Error(
@@ -29,6 +30,7 @@ export default class ReactMediaRecorder extends React.Component {
   static defaultProps = {
     audio: true,
     muted: false,
+    delay: 0,
     render: () => null
   };
 
@@ -110,8 +112,13 @@ export default class ReactMediaRecorder extends React.Component {
     this.mediaRecorder = this.initMediaRecorder(this.stream);
     this.chunks = [];
     this.setState({ mediaBlob: null });
-    this.mediaRecorder.start();
-    this.setState({ status: "recording" });
+    setTimeout(() => {
+      this.mediaRecorder.start();
+      this.setState({ status: "recording" });
+    }, this.props.delay);
+    if (this.props.delay > 0) {
+      this.setState({ status: "delayed_start" });
+    }
   };
 
   pauseRecording = () => {

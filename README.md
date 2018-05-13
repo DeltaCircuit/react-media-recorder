@@ -49,6 +49,7 @@ A string `enum`. Possible values:
 * `recording`
 * `paused`
 * `stopped`
+* `delayed_start` (_only if a `delay` has been set_)
 
 #### startRecording
 
@@ -105,12 +106,19 @@ if there's only `audio` is enabled,
 }
 ```
 
+#### delay
+
+If you want to start recording after a delay. In milliseconds.
+
+type: `number`  
+default: `0`
+
 #### muted
 
 Whether you want to mute the audio (while recording video)
 
 type: `boolean`  
-default: `false`  
+default: `false`
 
 #### render
 
