@@ -1,14 +1,15 @@
 {
   "name": "react-media-recorder",
-  "version": "0.4.0",
-  "description":
-    "A React component based on MediaRecorder() API to record audio/video streams",
+  "version": "0.4.1",
+  "description": "A React component based on MediaRecorder() API to record audio/video streams",
   "main": "index.js",
   "scripts": {
     "build": "rollup -c",
     "prepublishOnly": "npm run build"
   },
-  "files": ["lib"],
+  "files": [
+    "lib"
+  ],
   "repository": {
     "type": "git",
     "url": "git+https://github.com/giridharangm/react-media-recorder.git"
@@ -31,7 +32,7 @@
     "babel-cli": "^6.26.0",
     "babel-plugin-external-helpers": "^6.22.0",
     "babel-plugin-transform-class-properties": "^6.24.1",
-    "babel-preset-env": "^1.6.1",
+    "babel-preset-env": "^1.7.0",
     "babel-preset-react": "^6.24.1",
     "prop-types": "^15.6.1",
     "react": "^16.3.2",
