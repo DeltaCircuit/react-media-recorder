@@ -1,15 +1,14 @@
 {
   "name": "react-media-recorder",
-  "version": "0.4.1",
-  "description": "A React component based on MediaRecorder() API to record audio/video streams",
+  "version": "0.4.2",
+  "description":
+    "A React component based on MediaRecorder() API to record audio/video streams",
   "main": "index.js",
   "scripts": {
     "build": "rollup -c",
     "prepublishOnly": "npm run build"
   },
-  "files": [
-    "lib"
-  ],
+  "files": ["lib"],
   "repository": {
     "type": "git",
     "url": "git+https://github.com/giridharangm/react-media-recorder.git"
