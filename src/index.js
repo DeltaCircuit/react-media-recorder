@@ -1,6 +1,31 @@
 import React from "react";
 import PropTypes from "prop-types";
 
+function checkMediaConstraint(mediaConstraint) {
+  let mediaType = Object.keys(mediaConstraint)[0];
+  let constraint = mediaConstraint[mediaType];
+  if (constraintl) {
+    if (typeof constraint !== "boolean" && typeof constraint !== "object") {
+      return new Error(
+        `The ${mediaType} prop must be either a boolean or MediaTrackConstraints object. Please check your React Media Recorder component`
+      );
+    }
+  }
+  if (typeof constraint === "object") {
+    let supportedConstraints = navigator.mediaDevices.getSupportedConstraints();
+    let unsupportedConstraints = Object.keys(constraint).filter(
+      constraint => !supportedConstraints[constraint]
+    );
+    if (unsupportedConstraints.length > 0) {
+      return new Error(
+        `The constraint(s) [${unsupportedConstraints.join(
+          ","
+        )}] which you've supplied to the ${mediaType} prop are unsupported in this browser`
+      );
+    }
+  }
+}
+
 export default class ReactMediaRecorder extends React.Component {
   state = {
     status: "idle"
@@ -8,8 +33,8 @@ export default class ReactMediaRecorder extends React.Component {
   chunks = [];
 
   static propTypes = {
-    audio: PropTypes.oneOfType([PropTypes.bool, PropTypes.object]),
-    video: PropTypes.oneOfType([PropTypes.bool, PropTypes.object]),
+    audio: ({ audio }) => checkMediaConstraint({ audio }),
+    video: ({ video }) => checkMediaConstraint({ video }, true),
     delay: PropTypes.number,
     muted: ({ muted, audio, video }) => {
       if (typeof muted !== "boolean") {
