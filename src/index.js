@@ -70,6 +70,19 @@ export default class ReactMediaRecorder extends React.Component {
     }
   };
 
+  componentWillUnmount = () => {
+    this.flush();
+  };
+
+  flush = () => {
+    if (this.stream) {
+      this.stream.getTracks().forEach(track => track.stop());
+    }
+    this.mediaRecorder = null;
+    this.stream = null;
+    this.chunks = [];
+  };
+
   getMediaStream = async () => {
     try {
       const stream = await window.navigator.mediaDevices.getUserMedia(
