@@ -70,6 +70,12 @@ export default class ReactMediaRecorder extends React.Component {
       blobPropertyBag = video ? { type: "video/mp4" } : { type: "audio/wav" }
     } = props;
 
+    if (Object.prototype.hasOwnProperty.call(props, "muted")) {
+      console.warn(
+        "React Media Recorder: Please use mute() and unmute() functions available in the render method for muting/unmuting audio. mute prop will be deprecated soon."
+      );
+    }
+    props.muted && (this.state.status += `_muted`);
     this.requiredMedia = {
       audio: typeof audio === "boolean" ? !!audio : audio,
       video: typeof video === "boolean" ? !!video : video
@@ -80,8 +86,9 @@ export default class ReactMediaRecorder extends React.Component {
   componentDidMount = async () => {
     const stream = await this.getMediaStream();
     if (stream) {
-      let [audioTrack] = stream.getAudioTracks();
-      audioTrack.enabled = !this.props.muted;
+      stream
+        .getAudioTracks()
+        .forEach(track => (track.enabled = !this.props.muted));
       this.stream = stream;
     } else {
       this.setState({ status: "permission_denied" });
@@ -90,8 +97,24 @@ export default class ReactMediaRecorder extends React.Component {
 
   componentDidUpdate = prevProps => {
     if (prevProps.muted !== this.props.muted) {
-      let [audioTrack] = this.stream.getAudioTracks();
-      audioTrack.enabled = !this.props.muted;
+      this.stream
+        .getAudioTracks()
+        .forEach(track => (track.enabled = !this.props.muted));
+    }
+    if (this.stream) {
+      const isMuted = !this.stream
+        .getAudioTracks()
+        .every(track => track.enabled);
+      if (isMuted && !this.state.status.includes("muted")) {
+        this.setState(prevState => ({
+          status: `${this.state.status}_muted`
+        }));
+      }
+      if (!isMuted && this.state.status.includes("muted")) {
+        this.setState(prevState => ({
+          status: this.state.status.replace("_muted", "")
+        }));
+      }
     }
   };
 
@@ -106,6 +129,15 @@ export default class ReactMediaRecorder extends React.Component {
     this.mediaRecorder = null;
     this.stream = null;
     this.chunks = [];
+  };
+
+  muteAudio = mute => {
+    if (this.stream) {
+      if (this.stream.getAudioTracks().every(track => track.enabled === mute)) {
+        this.stream.getAudioTracks().forEach(track => (track.enabled = !mute));
+        this.setState(this.state); // Dummy state update.
+      }
+    }
   };
 
   getMediaStream = async () => {
@@ -188,6 +220,8 @@ export default class ReactMediaRecorder extends React.Component {
       stopRecording: this.stopRecording,
       pauseRecording: this.pauseRecording,
       resumeRecording: this.resumeRecording,
+      muteAudio: () => this.muteAudio(true),
+      unmuteAudio: () => this.muteAudio(false),
       mediaBlob: this.state.mediaBlob
     });
 }

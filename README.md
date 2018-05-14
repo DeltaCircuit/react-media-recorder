@@ -49,7 +49,9 @@ A string `enum`. Possible values:
 * `recording`
 * `paused`
 * `stopped`
-* `delayed_start` (_only if a `delay` has been set_)
+* `delayed_start` (_only if a `delay` has been set_) [_deprecating soon_]
+
+If the audio is muted, you'll see the status suffixed with `_muted`.
 
 #### startRecording
 
@@ -66,6 +68,14 @@ A `function`, which resumes the recording when invoked.
 #### stopRecording
 
 A `function`, which stops recording when invoked.
+
+#### muteAudio
+
+A `function`, which mutes the audio tracks when invoked.
+
+#### unmuteAudio
+
+A `function` which unmutes the audio tracks when invoked.
 
 #### mediaBlob
 
@@ -106,14 +116,14 @@ if there's only `audio` is enabled,
 }
 ```
 
-#### delay
+#### delay [_deprecating soon_]
 
 If you want to start recording after a delay. In milliseconds.
 
 type: `number`  
 default: `0`
 
-#### muted
+#### muted [_deprcating soon_]
 
 Whether you want to mute the audio (while recording video)
 
