@@ -26,6 +26,15 @@ function checkMediaConstraint(mediaConstraint) {
   }
 }
 
+let errors = {
+  AbortError: "media_aborted",
+  NotAllowedError: "permission_denied",
+  NotFoundError: "no_specified_media_found",
+  NotReadableError: "media_in_use",
+  OverconstrainedError: "invalid_media_constraints",
+  TypeError: "no_constraints"
+};
+
 export default class ReactMediaRecorder extends React.Component {
   state = {
     status: "idle"
@@ -85,16 +94,14 @@ export default class ReactMediaRecorder extends React.Component {
 
   componentDidMount = async () => {
     const stream = await this.getMediaStream();
+
     if (stream) {
       stream
         .getAudioTracks()
         .forEach(track => (track.enabled = !this.props.muted));
       this.stream = stream;
-    } else {
-      this.setState({ status: "permission_denied" });
     }
   };
-
   componentDidUpdate = prevProps => {
     if (prevProps.muted !== this.props.muted) {
       this.stream
@@ -147,7 +154,7 @@ export default class ReactMediaRecorder extends React.Component {
       );
       return stream;
     } catch (error) {
-      return false;
+      this.setState({ status: errors[error.name] });
     }
   };
 
@@ -175,7 +182,6 @@ export default class ReactMediaRecorder extends React.Component {
       if (stream) {
         this.stream = stream;
       } else {
-        this.setState({ status: "permission_denied" });
         return;
       }
     }
