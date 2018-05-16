@@ -45,10 +45,15 @@ Since `react-media-recording` uses render prop, you can define what to render in
 A string `enum`. Possible values:
 
 * `idle`
-* `permission_denied`
 * `recording`
 * `paused`
 * `stopped`
+* `no_constraints`
+* `invalid_media_constraints`
+* `no_specified_media_found`
+* `media_in_use`
+* `media_aborted`
+* `permission_denied`
 * `delayed_start` (_only if a `delay` has been set_) [_deprecating soon_]
 
 If the audio is muted, you'll see the status suffixed with `_muted`.
