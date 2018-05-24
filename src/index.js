@@ -4,7 +4,7 @@ import PropTypes from "prop-types";
 function checkMediaConstraint(mediaConstraint) {
   let mediaType = Object.keys(mediaConstraint)[0];
   let constraint = mediaConstraint[mediaType];
-  if (constraintl) {
+  if (constraint) {
     if (typeof constraint !== "boolean" && typeof constraint !== "object") {
       return new Error(
         `The ${mediaType} prop must be either a boolean or MediaTrackConstraints object. Please check your React Media Recorder component`
