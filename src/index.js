@@ -58,14 +58,16 @@ export default class ReactMediaRecorder extends React.Component {
       }
     },
     render: PropTypes.func.isRequired,
-    blobPropertyBag: PropTypes.object
+    blobPropertyBag: PropTypes.object,
+    whenStopped: PropTypes.func
   };
 
   static defaultProps = {
     audio: true,
     muted: false,
     delay: 0,
-    render: () => null
+    render: () => null,
+    whenStopped: () => null
   };
 
   constructor(props) {
@@ -161,7 +163,10 @@ export default class ReactMediaRecorder extends React.Component {
   onRecordingStop = () => {
     const blob = new Blob(this.chunks, this.blobPropertyBag);
     const url = URL.createObjectURL(blob);
-    this.setState({ mediaBlob: url });
+    if (this.props.whenStopped) {
+      this.props.whenStopped(url);
+    }
+    this.setState({ mediaBlob: url, status: "stopped" });
   };
 
   onRecordingActive = ({ data }) => {
@@ -215,7 +220,6 @@ export default class ReactMediaRecorder extends React.Component {
     if (this.mediaRecorder && this.mediaRecorder.state !== "inactive") {
       this.mediaRecorder.stop();
       this.mediaRecorder = null;
-      this.setState({ status: "stopped" });
     }
   };
 
