@@ -149,6 +149,13 @@ Can be either a boolean value or a [MediaTrackConstraints](https://developer.moz
 type: `boolean` or `object`  
 default: `false`
 
+#### whenStopped(blobUrl)
+
+Will be invoked when the recording stops. This callback will be invoked with the blobUrl as its params.
+
+type: `function`  
+default: `() => null`
+
 ## Contributing
 
 Feel free to submit a PR if you found a bug (I might've missed many! :grinning:) or if you want to enhance it further.

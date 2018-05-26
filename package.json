@@ -1,6 +1,6 @@
 {
   "name": "react-media-recorder",
-  "version": "0.6.1",
+  "version": "0.7.0",
   "description":
     "A React component based on MediaRecorder() API to record audio/video streams",
   "main": "index.js",
