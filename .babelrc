@@ -1,15 +1,13 @@
 {
-  "presets": [
+  "presets": ["env", "react", "minify"],
+  "plugins": [
+    "external-helpers",
+    "transform-class-properties",
     [
-      "env",
+      "transform-runtime",
       {
-        "modules": false,
-        "targets": {
-          "browsers": ["last 2 Chrome versions"]
-        }
+        "polyfill": false
       }
-    ],
-    "react"
-  ],
-  "plugins": ["external-helpers", "transform-class-properties"]
+    ]
+  ]
 }
