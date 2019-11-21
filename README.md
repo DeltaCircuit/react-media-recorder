@@ -17,7 +17,7 @@ yarn add react-media-recorder
 ## Usage
 
 ```javascript
-import ReactMediaRecorder from "react-media-recorder";
+import { ReactMediaRecorder } from "react-media-recorder";
 
 const RecordView = () => (
   <div>
