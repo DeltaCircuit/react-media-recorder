@@ -89,7 +89,7 @@ default: `() => null`
 
 #### screen
 
-A `boolean` value. Lets you to record your current screen. Not all browsers would support this. Please [check here](https://caniuse.com/#search=getDisplayMedia) for the availability.
+A `boolean` value. Lets you to record your current screen. Not all browsers would support this. Please [check here](https://caniuse.com/#search=getDisplayMedia) for the availability. Please note that at the moment, the MediaRecorder won't record two alike streams at a time, if you provide both `screen` and `video` prop, the **screen capturing will take precedence** than the video capturing. But, you can provide the `video` prop (_as the MediaTrackConstraints_) which will then utilized by screen capture (for example, `height`, `width` etc..)
 
 #### video
 
