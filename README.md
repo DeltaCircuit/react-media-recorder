@@ -1,17 +1,17 @@
-# react-media-recorder :o2: :video_camera: :microphone:
+# react-media-recorder :o2: :video_camera: :microphone: :computer:
 
-`react-media-recorder` is a react component with render prop that can be used to record audio/video streams using [MediaRecorder](https://developer.mozilla.org/en-US/docs/Web/API/MediaRecorder) API.
+`react-media-recorder` is a fully typed react component with render prop that can be used to record audio/video streams using [MediaRecorder](https://developer.mozilla.org/en-US/docs/Web/API/MediaRecorder) API.
 
 ## Installation
 
 ```
-npm i -S react-media-recorder  
+npm i -S react-media-recorder
 ```
 
 or
 
 ```
-yarn add react-media-recorder  
+yarn add react-media-recorder
 ```
 
 ## Usage
@@ -23,12 +23,12 @@ const RecordView = () => (
   <div>
     <ReactMediaRecorder
       video
-      render={({ status, startRecording, stopRecording, mediaBlob }) => (
+      render={({ status, startRecording, stopRecording, mediaBlobUrl }) => (
         <div>
           <p>{status}</p>
           <button onClick={startRecording}>Start Recording</button>
           <button onClick={stopRecording}>Stop Recording</button>
-          <video src={mediaBlob} controls />
+          <video src={mediaBlobUrl} controls autoplay loop />
         </div>
       )}
     />
@@ -36,27 +36,98 @@ const RecordView = () => (
 );
 ```
 
-Since `react-media-recording` uses render prop, you can define what to render in the view. Just don't forget to wire the `startRecording`, `stopRecording` and `mediaBlob` to your component.
+Since `react-media-recording` uses render prop, you can define what to render in the view. Just don't forget to wire the `startRecording`, `stopRecording` and `mediaBlobUrl` to your component.
+
+### Options / Props
+
+#### audio
+
+Can be either a boolean value or a [MediaTrackConstraints](https://developer.mozilla.org/en-US/docs/Web/API/MediaTrackConstraints) object.
+
+type: `boolean` or `object`  
+default: `true`
+
+#### blobPropertyBag
+
+[From MDN](https://developer.mozilla.org/en-US/docs/Web/API/Blob/Blob):  
+An optional `BlobPropertyBag` dictionary which may specify the following two attributes (for the `mediaBlob`):
+
+- `type`, that represents the MIME type of the content of the array that will be put in the blob.
+- `endings`, with a default value of "transparent", that specifies how strings containing the line ending character \n are to be written out. It is one of the two values: "native", meaning that line ending characters are changed to match host OS filesystem convention, or "transparent", meaning that endings are stored in the blob without change
+
+type: `object`  
+default:  
+if `video` is enabled,
+
+```
+{
+   type: "video/mp4"
+}
+```
+
+if there's only `audio` is enabled,
+
+```
+{
+  type: "audio/wav"
+}
+```
+
+#### onStop
+
+A `function` that would get invoked when the MediaRecorder stops. It'll provide the blob url as its param.
+
+type: `function(blobUrl: string)`  
+default: `() => null`
+
+#### render
+
+A `function` which accepts an object containing fields: `status`, `startRecording`, `stopRecording` and`mediaBlob`. This function would return a react element/component.
+
+type: `function`  
+default: `() => null`
+
+#### screen
+
+A `boolean` value. Lets you to record your current screen. Not all browsers would support this. Please [check here](https://caniuse.com/#search=getDisplayMedia) for the availability.
+
+#### video
+
+Can be either a boolean value or a [MediaTrackConstraints](https://developer.mozilla.org/en-US/docs/Web/API/MediaTrackConstraints) object.
+
+type: `boolean` or `object`  
+default: `false`
 
 ### Props available in the `render` function
+
+#### error
+
+A string enum. Possible values:
+
+- `media_aborted`
+- `permission_denied`
+- `no_specified_media_found`
+- `media_in_use`
+- `invalid_media_constraints`
+- `no_constraints`
+- `recorder_error`
 
 #### status
 
 A string `enum`. Possible values:
 
-* `idle`
-* `recording`
-* `paused`
-* `stopped`
-* `no_constraints`
-* `invalid_media_constraints`
-* `no_specified_media_found`
-* `media_in_use`
-* `media_aborted`
-* `permission_denied`
-* `delayed_start` (_only if a `delay` has been set_) [_deprecating soon_]
-
-If the audio is muted, you'll see the status suffixed with `_muted`.
+- `media_aborted`
+- `permission_denied`
+- `no_specified_media_found`
+- `media_in_use`
+- `invalid_media_constraints`
+- `no_constraints`
+- `recorder_error`
+- `idle`
+- `acquiring_media`
+- `recording`
+- `stopping`
+- `stopped`
 
 #### startRecording
 
@@ -82,79 +153,13 @@ A `function`, which mutes the audio tracks when invoked.
 
 A `function` which unmutes the audio tracks when invoked.
 
-#### mediaBlob
+#### mediaBlobUrl
 
 A `blob` url that can be wired to an `<audio />`, `<video />` or an `<a />` element.
 
-### Options / Props
+#### isMuted
 
-#### audio
-
-Can be either a boolean value or a [MediaTrackConstraints](https://developer.mozilla.org/en-US/docs/Web/API/MediaTrackConstraints) object.
-
-type: `boolean` or `object`  
-default: `true`
-
-#### blobPropertyBag
-
-[From MDN](https://developer.mozilla.org/en-US/docs/Web/API/Blob/Blob):  
-An optional `BlobPropertyBag` dictionary which may specify the following two attributes (for the `mediaBlob`):
-
-* `type`, that represents the MIME type of the content of the array that will be put in the blob.
-* `endings`, with a default value of "transparent", that specifies how strings containing the line ending character \n are to be written out. It is one of the two values: "native", meaning that line ending characters are changed to match host OS filesystem convention, or "transparent", meaning that endings are stored in the blob without change
-
-type: `object`  
-default:  
-if `video` is enabled,
-
-```
-{
-   type: "video/mp4"
-}
-```
-
-if there's only `audio` is enabled,
-
-```
-{
-  type: "audio/wav"
-}
-```
-
-#### delay [_deprecating soon_]
-
-If you want to start recording after a delay. In milliseconds.
-
-type: `number`  
-default: `0`
-
-#### muted [_deprcating soon_]
-
-Whether you want to mute the audio (while recording video)
-
-type: `boolean`  
-default: `false`
-
-#### render
-
-A `function` which accepts an object containing fields: `status`, `startRecording`, `stopRecording` and`mediaBlob`. This function would return a react element/component.
-
-type: `function`  
-default: `() => null`
-
-#### video
-
-Can be either a boolean value or a [MediaTrackConstraints](https://developer.mozilla.org/en-US/docs/Web/API/MediaTrackConstraints) object.
-
-type: `boolean` or `object`  
-default: `false`
-
-#### whenStopped(blobUrl)
-
-Will be invoked when the recording stops. This callback will be invoked with the blobUrl as its params.
-
-type: `function`  
-default: `() => null`
+A boolean prop that tells whether the audio is muted or not.
 
 ## Contributing
 
