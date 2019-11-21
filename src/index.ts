@@ -104,11 +104,6 @@ export const ReactMediaRecorder = ({
       if (!window.navigator.mediaDevices.getDisplayMedia) {
         throw new Error("This browser doesn't support screen capturing");
       }
-      if (video) {
-        console.warn(
-          `Recording of both screen and video is not supported this time. Screen recording will take precedence`
-        );
-      }
     }
 
     const checkConstraints = (mediaType: MediaTrackConstraints) => {
