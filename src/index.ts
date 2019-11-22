@@ -67,33 +67,38 @@ export const ReactMediaRecorder = ({
   const [error, setError] = useState<keyof typeof RecorderErrors>("NONE");
 
   const getMediaStream = useCallback(async () => {
+    setStatus("acquiring_media");
     const requiredMedia: MediaStreamConstraints = {
       audio: typeof audio === "boolean" ? !!audio : audio,
       video: typeof video === "boolean" ? !!video : video
     };
+    try {
+      if (screen) {
+        //@ts-ignore
+        const stream = (await window.navigator.mediaDevices.getDisplayMedia({
+          video
+        })) as MediaStream;
+        if (audio) {
+          const audioStream = await window.navigator.mediaDevices.getUserMedia({
+            audio
+          });
 
-    if (screen) {
-      //@ts-ignore
-      const stream = (await window.navigator.mediaDevices.getDisplayMedia({
-        video
-      })) as MediaStream;
-      if (audio) {
-        const audioStream = await window.navigator.mediaDevices.getUserMedia({
-          audio
-        });
-
-        audioStream
-          .getAudioTracks()
-          .forEach(audioTrack => stream.addTrack(audioTrack));
+          audioStream
+            .getAudioTracks()
+            .forEach(audioTrack => stream.addTrack(audioTrack));
+        }
+        mediaStream.current = stream;
       }
-      return stream;
+
+      const stream = await window.navigator.mediaDevices.getUserMedia(
+        requiredMedia
+      );
+      mediaStream.current = stream;
+      setStatus("idle");
+    } catch (error) {
+      setError(error.name);
+      setStatus("idle");
     }
-
-    const stream = await window.navigator.mediaDevices.getUserMedia(
-      requiredMedia
-    );
-
-    return stream;
   }, [audio, video, screen]);
 
   useEffect(() => {
@@ -140,8 +145,7 @@ export const ReactMediaRecorder = ({
     }
 
     async function loadStream() {
-      const stream = await getMediaStream();
-      mediaStream.current = stream;
+      await getMediaStream();
     }
 
     if (!mediaStream.current) {
@@ -152,27 +156,21 @@ export const ReactMediaRecorder = ({
   // Media Recorder Handlers
 
   const startRecording = async () => {
+    setError("NONE");
     if (!mediaStream.current) {
-      try {
-        setStatus("acquiring_media");
-        const stream = await getMediaStream();
-        setStatus("idle");
-        mediaStream.current = stream;
-      } catch (error) {
-        setError(error.name);
-        setStatus("idle");
-        return;
-      }
+      await getMediaStream();
     }
-    mediaRecorder.current = new MediaRecorder(mediaStream.current);
-    mediaRecorder.current.ondataavailable = onRecordingActive;
-    mediaRecorder.current.onstop = onRecordingStop;
-    mediaRecorder.current.onerror = () => {
-      setError("NO_RECORDER");
-      setStatus("idle");
-    };
-    mediaRecorder.current.start();
-    setStatus("recording");
+    if (mediaStream.current) {
+      mediaRecorder.current = new MediaRecorder(mediaStream.current);
+      mediaRecorder.current.ondataavailable = onRecordingActive;
+      mediaRecorder.current.onstop = onRecordingStop;
+      mediaRecorder.current.onerror = () => {
+        setError("NO_RECORDER");
+        setStatus("idle");
+      };
+      mediaRecorder.current.start();
+      setStatus("recording");
+    }
   };
 
   const onRecordingActive = ({ data }: BlobEvent) => {
