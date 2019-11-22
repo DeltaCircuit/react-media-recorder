@@ -73,6 +73,13 @@ if there's only `audio` is enabled,
 }
 ```
 
+#### mediaRecorderOptions
+
+An optional options object that will be passed to `MediaRecorder`. Please note that if you specify the MIME type via either `audio` or `video` prop _and_ through this `mediaRecorderOptions`, the `mediaRecorderOptions` have higher precedence.
+
+type: `object`  
+default: `{}`
+
 #### onStop
 
 A `function` that would get invoked when the MediaRecorder stops. It'll provide the blob url as its param.
