@@ -20,6 +20,7 @@ type ReactMediaRecorderProps = {
   screen?: boolean;
   onStop?: (blobUrl: string) => void;
   blobPropertyBag?: BlobPropertyBag;
+  mediaRecorderOptions?: MediaRecorderOptions | null;
 };
 
 type StatusMessages =
@@ -54,7 +55,8 @@ export const ReactMediaRecorder = ({
   video = false,
   onStop = () => null,
   blobPropertyBag,
-  screen = false
+  screen = false,
+  mediaRecorderOptions = null
 }: ReactMediaRecorderProps) => {
   const mediaRecorder = useRef<MediaRecorder | null>(null);
   const mediaChunks = useRef<Blob[]>([]);
@@ -129,6 +131,14 @@ export const ReactMediaRecorder = ({
       checkConstraints(video);
     }
 
+    if (mediaRecorderOptions && mediaRecorderOptions.mimeType) {
+      if (!MediaRecorder.isTypeSupported(mediaRecorderOptions.mimeType)) {
+        console.error(
+          `The specified MIME type you supplied for MediaRecorder doesn't support this browser`
+        );
+      }
+    }
+
     async function loadStream() {
       const stream = await getMediaStream();
       mediaStream.current = stream;
@@ -137,7 +147,7 @@ export const ReactMediaRecorder = ({
     if (!mediaStream.current) {
       loadStream();
     }
-  }, [audio, screen, video, getMediaStream]);
+  }, [audio, screen, video, getMediaStream, mediaRecorderOptions]);
 
   // Media Recorder Handlers
 
