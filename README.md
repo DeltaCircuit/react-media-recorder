@@ -1,11 +1,16 @@
 # react-media-recorder :o2: :video_camera: :microphone: :computer:
 
-`react-media-recorder` is a fully typed react component with render prop that can be used to record audio/video streams or the screens using [MediaRecorder](https://developer.mozilla.org/en-US/docs/Web/API/MediaRecorder) API.
+`react-media-recorder` is a fully typed react component with render prop that can be used to:
+
+- Record audio/video
+- Record screen
+
+using [MediaRecorder API](https://developer.mozilla.org/en-US/docs/Web/API/MediaRecorder).
 
 ## Installation
 
 ```
-npm i -S react-media-recorder
+npm i react-media-recorder
 ```
 
 or
@@ -167,6 +172,37 @@ A `blob` url that can be wired to an `<audio />`, `<video />` or an `<a />` elem
 #### isMuted
 
 A boolean prop that tells whether the audio is muted or not.
+
+#### previewStream
+
+If you want to create a live-preview of the video to the user, you can use this _stream_ and attach it to a `<video />` element. Please note that this is a **muted stream**. This is by design to get rid of internal microphone feedbacks on machines like laptop.
+
+For example:
+
+```tsx
+const VideoPreview = ({ stream }: { stream: MediaStream | null }) => {
+  const videoRef = useRef<HTMLVideoElement>(null);
+
+  useEffect(() => {
+    if (videoRef.current && stream) {
+      videoRef.current.srcObject = stream;
+    }
+  }, [stream]);
+  if (!stream) {
+    return null;
+  }
+  return <video ref={videoRef} width={500} height={500} autoPlay controls />;
+};
+
+const App = () => (
+  <ReactMediaRecorder
+    video
+    render={({ videoPreviewStream }) => {
+      return <VideoPreview stream={videoPreviewStream} />;
+    }}
+  />
+);
+```
 
 ## Contributing
 

@@ -11,6 +11,7 @@ type ReactMediaRecorderRenderProps = {
   mediaBlobUrl: null | string;
   status: StatusMessages;
   isAudioMuted: boolean;
+  previewStream: MediaStream | null;
 };
 
 type ReactMediaRecorderProps = {
@@ -76,7 +77,7 @@ export const ReactMediaRecorder = ({
       if (screen) {
         //@ts-ignore
         const stream = (await window.navigator.mediaDevices.getDisplayMedia({
-          video
+          video: video || true
         })) as MediaStream;
         if (audio) {
           const audioStream = await window.navigator.mediaDevices.getUserMedia({
@@ -88,12 +89,12 @@ export const ReactMediaRecorder = ({
             .forEach(audioTrack => stream.addTrack(audioTrack));
         }
         mediaStream.current = stream;
+      } else {
+        const stream = await window.navigator.mediaDevices.getUserMedia(
+          requiredMedia
+        );
+        mediaStream.current = stream;
       }
-
-      const stream = await window.navigator.mediaDevices.getUserMedia(
-        requiredMedia
-      );
-      mediaStream.current = stream;
       setStatus("idle");
     } catch (error) {
       setError(error.name);
@@ -224,6 +225,9 @@ export const ReactMediaRecorder = ({
     stopRecording,
     mediaBlobUrl,
     status,
-    isAudioMuted
+    isAudioMuted,
+    previewStream: mediaStream.current
+      ? new MediaStream(mediaStream.current.getVideoTracks())
+      : null
   });
 };
