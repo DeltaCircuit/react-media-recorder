@@ -4,7 +4,7 @@ type ReactMediaRecorderRenderProps = {
   error: string;
   muteAudio: () => void;
   unMuteAudio: () => void;
-  startRecording: () => void; 
+  startRecording: () => void;
   pauseRecording: () => void;
   resumeRecording: () => void;
   stopRecording: () => void;
@@ -162,6 +162,12 @@ export const ReactMediaRecorder = ({
       await getMediaStream();
     }
     if (mediaStream.current) {
+      const isStreamEnded = mediaStream.current
+        .getTracks()
+        .some((track) => track.readyState === "ended");
+      if (isStreamEnded) {
+        await getMediaStream();
+      }
       mediaRecorder.current = new MediaRecorder(mediaStream.current);
       mediaRecorder.current.ondataavailable = onRecordingActive;
       mediaRecorder.current.onstop = onRecordingStop;
@@ -214,6 +220,8 @@ export const ReactMediaRecorder = ({
       if (mediaRecorder.current.state !== "inactive") {
         setStatus("stopping");
         mediaRecorder.current.stop();
+        mediaStream.current &&
+          mediaStream.current.getTracks().forEach((track) => track.stop());
         mediaChunks.current = [];
       }
     }
