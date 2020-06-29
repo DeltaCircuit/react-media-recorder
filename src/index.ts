@@ -19,7 +19,7 @@ type ReactMediaRecorderProps = {
   audio?: boolean | MediaTrackConstraints;
   video?: boolean | MediaTrackConstraints;
   screen?: boolean;
-  onStop?: (blobUrl: string) => void;
+  onStop?: (blobUrl: string, blob: Blob) => void;
   blobPropertyBag?: BlobPropertyBag;
   mediaRecorderOptions?: MediaRecorderOptions | null;
 };
@@ -47,7 +47,7 @@ enum RecorderErrors {
   OverconstrainedError = "invalid_media_constraints",
   TypeError = "no_constraints",
   NONE = "",
-  NO_RECORDER = "recorder_error"
+  NO_RECORDER = "recorder_error",
 }
 
 export const ReactMediaRecorder = ({
@@ -57,7 +57,7 @@ export const ReactMediaRecorder = ({
   onStop = () => null,
   blobPropertyBag,
   screen = false,
-  mediaRecorderOptions = null
+  mediaRecorderOptions = null,
 }: ReactMediaRecorderProps) => {
   const mediaRecorder = useRef<MediaRecorder | null>(null);
   const mediaChunks = useRef<Blob[]>([]);
@@ -71,22 +71,22 @@ export const ReactMediaRecorder = ({
     setStatus("acquiring_media");
     const requiredMedia: MediaStreamConstraints = {
       audio: typeof audio === "boolean" ? !!audio : audio,
-      video: typeof video === "boolean" ? !!video : video
+      video: typeof video === "boolean" ? !!video : video,
     };
     try {
       if (screen) {
         //@ts-ignore
         const stream = (await window.navigator.mediaDevices.getDisplayMedia({
-          video: video || true
+          video: video || true,
         })) as MediaStream;
         if (audio) {
           const audioStream = await window.navigator.mediaDevices.getUserMedia({
-            audio
+            audio,
           });
 
           audioStream
             .getAudioTracks()
-            .forEach(audioTrack => stream.addTrack(audioTrack));
+            .forEach((audioTrack) => stream.addTrack(audioTrack));
         }
         mediaStream.current = stream;
       } else {
@@ -117,7 +117,7 @@ export const ReactMediaRecorder = ({
     const checkConstraints = (mediaType: MediaTrackConstraints) => {
       const supportedMediaConstraints = navigator.mediaDevices.getSupportedConstraints();
       const unSupportedConstraints = Object.keys(mediaType).filter(
-        constraint =>
+        (constraint) =>
           !(supportedMediaConstraints as { [key: string]: any })[constraint]
       );
 
@@ -145,12 +145,8 @@ export const ReactMediaRecorder = ({
       }
     }
 
-    async function loadStream() {
-      await getMediaStream();
-    }
-
     if (!mediaStream.current) {
-      loadStream();
+      getMediaStream();
     }
   }, [audio, screen, video, getMediaStream, mediaRecorderOptions]);
 
@@ -162,6 +158,12 @@ export const ReactMediaRecorder = ({
       await getMediaStream();
     }
     if (mediaStream.current) {
+      const isStreamEnded = mediaStream.current
+        .getTracks()
+        .some((track) => track.readyState === "ended");
+      if (isStreamEnded) {
+        await getMediaStream();
+      }
       mediaRecorder.current = new MediaRecorder(mediaStream.current);
       mediaRecorder.current.ondataavailable = onRecordingActive;
       mediaRecorder.current.onstop = onRecordingStop;
@@ -179,13 +181,16 @@ export const ReactMediaRecorder = ({
   };
 
   const onRecordingStop = () => {
-    const blobProperty: BlobPropertyBag =
-      blobPropertyBag || (video ? { type: "video/mp4" } : { type: "audio/wav" });
+    const [chunk] = mediaChunks.current;
+    const blobProperty: BlobPropertyBag = Object.assign(
+      { type: chunk.type },
+      blobPropertyBag || (video ? { type: "video/mp4" } : { type: "audio/wav" })
+    );
     const blob = new Blob(mediaChunks.current, blobProperty);
     const url = URL.createObjectURL(blob);
     setStatus("stopped");
     setMediaBlobUrl(url);
-    onStop(url);
+    onStop(url, blob);
   };
 
   const muteAudio = (mute: boolean) => {
@@ -193,7 +198,7 @@ export const ReactMediaRecorder = ({
     if (mediaStream.current) {
       mediaStream.current
         .getAudioTracks()
-        .forEach(audioTrack => (audioTrack.enabled = !mute));
+        .forEach((audioTrack) => (audioTrack.enabled = !mute));
     }
   };
 
@@ -210,8 +215,13 @@ export const ReactMediaRecorder = ({
 
   const stopRecording = () => {
     if (mediaRecorder.current) {
-      setStatus("stopping");
-      mediaRecorder.current.stop();
+      if (mediaRecorder.current.state !== "inactive") {
+        setStatus("stopping");
+        mediaRecorder.current.stop();
+        mediaStream.current &&
+          mediaStream.current.getTracks().forEach((track) => track.stop());
+        mediaChunks.current = [];
+      }
     }
   };
 
@@ -228,6 +238,6 @@ export const ReactMediaRecorder = ({
     isAudioMuted,
     previewStream: mediaStream.current
       ? new MediaStream(mediaStream.current.getVideoTracks())
-      : null
+      : null,
   });
 };
