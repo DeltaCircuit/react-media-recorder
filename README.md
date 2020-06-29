@@ -167,7 +167,11 @@ A `function` which unmutes the audio tracks when invoked.
 
 #### mediaBlobUrl
 
-A `blob` url that can be wired to an `<audio />`, `<video />` or an `<a />` element.
+A `blob` url that can be wired to an `<audio />`, `<video />` or an `<a />` element.  
+
+#### clearBlobUrl  
+
+A `function` which clears the existing generated blob url (if any)
 
 #### isMuted
 
