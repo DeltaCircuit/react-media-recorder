@@ -12,6 +12,7 @@ type ReactMediaRecorderRenderProps = {
   status: StatusMessages;
   isAudioMuted: boolean;
   previewStream: MediaStream | null;
+  clearBlobUrl: () => void;
 };
 
 type ReactMediaRecorderProps = {
@@ -239,5 +240,6 @@ export const ReactMediaRecorder = ({
     previewStream: mediaStream.current
       ? new MediaStream(mediaStream.current.getVideoTracks())
       : null,
+    clearBlobUrl: () => setMediaBlobUrl(null),
   });
 };
