@@ -197,8 +197,8 @@ const VideoPreview = ({ stream }: { stream: MediaStream | null }) => {
 const App = () => (
   <ReactMediaRecorder
     video
-    render={({ videoPreviewStream }) => {
-      return <VideoPreview stream={videoPreviewStream} />;
+    render={({ previewStream }) => {
+      return <VideoPreview stream={previewStream} />;
     }}
   />
 );
