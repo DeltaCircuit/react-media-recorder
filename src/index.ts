@@ -145,12 +145,8 @@ export const ReactMediaRecorder = ({
       }
     }
 
-    async function loadStream() {
-      await getMediaStream();
-    }
-
     if (!mediaStream.current) {
-      loadStream();
+      getMediaStream();
     }
   }, [audio, screen, video, getMediaStream, mediaRecorderOptions]);
 
