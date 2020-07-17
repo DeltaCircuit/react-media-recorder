@@ -106,7 +106,9 @@ export const ReactMediaRecorder = ({
   }, [audio, video, screen]);
 
   useEffect(() => {
+    console.log("test test")
     if (!window.MediaRecorder) {
+      alert("Unsupported Browser")
       throw new Error("Unsupported Browser");
     }
 
@@ -167,7 +169,18 @@ export const ReactMediaRecorder = ({
       if (isStreamEnded) {
         await getMediaStream();
       }
+
+      // mediaRecorder.current.onstop = onRecordingStop;
       mediaRecorder.current = new MediaRecorder(mediaStream.current);
+      mediaRecorder.current.addEventListener("dataavailable", event => {
+        onRecordingActive(event)
+      });
+
+      // mediaRecorder.current.ondataavailable = onRecordingActive;
+      mediaRecorder.current.addEventListener("stop", () => {
+        onRecordingStop()
+        mediaRecorder.current.stream.getTracks().forEach(track => track.stop())
+        console.log("executing stop event listener");})
       mediaRecorder.current.ondataavailable = onRecordingActive;
       mediaRecorder.current.onstop = onRecordingStop;
       mediaRecorder.current.onerror = () => {
@@ -217,6 +230,8 @@ export const ReactMediaRecorder = ({
   };
 
   const stopRecording = () => {
+    console.log("stop recording called ")
+    console.log(mediaRecorder.current, " current")
     if (mediaRecorder.current) {
       if (mediaRecorder.current.state !== "inactive") {
         console.log("stopping the recording from stopRecording")
