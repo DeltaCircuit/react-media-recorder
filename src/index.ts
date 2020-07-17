@@ -1,4 +1,5 @@
 import { ReactElement, useCallback, useEffect, useRef, useState } from "react";
+import AudioRecorder from 'audio-recorder-polyfill'
 
 type ReactMediaRecorderRenderProps = {
   error: string;
@@ -60,7 +61,8 @@ export const ReactMediaRecorder = ({
   screen = false,
   mediaRecorderOptions = null,
 }: ReactMediaRecorderProps) => {
-  const mediaRecorder = useRef<MediaRecorder | null>(null);
+  window.MediaRecorder = AudioRecorder
+  const mediaRecorder = useRef<AudioRecorder | null>(null);
   const mediaChunks = useRef<Blob[]>([]);
   const mediaStream = useRef<MediaStream | null>(null);
   const [status, setStatus] = useState<StatusMessages>("idle");
@@ -217,6 +219,7 @@ export const ReactMediaRecorder = ({
   const stopRecording = () => {
     if (mediaRecorder.current) {
       if (mediaRecorder.current.state !== "inactive") {
+        console.log("stopping the recording from stopRecording")
         setStatus("stopping");
         mediaRecorder.current.stop();
         mediaStream.current &&
