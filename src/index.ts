@@ -24,6 +24,7 @@ type ReactMediaRecorderProps = {
   blobPropertyBag?: BlobPropertyBag;
   mediaRecorderOptions?: MediaRecorderOptions | null;
   deviceId?: string | null;
+  customMediaStream?: MediaStream | null;
 };
 
 type StatusMessages =
@@ -61,6 +62,7 @@ export const ReactMediaRecorder = ({
   screen = false,
   mediaRecorderOptions = null,
   deviceId = null,
+  customMediaStream = null,
 }: ReactMediaRecorderProps) => {
   const mediaRecorder = useRef<MediaRecorder | null>(null);
   const mediaChunks = useRef<Blob[]>([]);
@@ -82,7 +84,9 @@ export const ReactMediaRecorder = ({
       };
     }
     try {
-      if (screen) {
+      if (customMediaStream) {
+        mediaStream.current = customMediaStream;
+      } else if (screen) {
         //@ts-ignore
         const stream = (await window.navigator.mediaDevices.getDisplayMedia({
           video: video || true,
