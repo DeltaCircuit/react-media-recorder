@@ -25,6 +25,7 @@ type ReactMediaRecorderProps = {
   mediaRecorderOptions?: MediaRecorderOptions | null;
   deviceId?: string | null;
   customMediaStream?: MediaStream | null;
+  stopStreamsOnStop?: boolean;
 };
 
 type StatusMessages =
@@ -63,6 +64,7 @@ export const ReactMediaRecorder = ({
   mediaRecorderOptions = null,
   deviceId = null,
   customMediaStream = null,
+  stopStreamsOnStop = true,
 }: ReactMediaRecorderProps) => {
   const mediaRecorder = useRef<MediaRecorder | null>(null);
   const mediaChunks = useRef<Blob[]>([]);
@@ -230,8 +232,10 @@ export const ReactMediaRecorder = ({
       if (mediaRecorder.current.state !== "inactive") {
         setStatus("stopping");
         mediaRecorder.current.stop();
-        mediaStream.current &&
-          mediaStream.current.getTracks().forEach((track) => track.stop());
+        if (stopStreamsOnStop) {
+          mediaStream.current &&
+            mediaStream.current.getTracks().forEach((track) => track.stop());
+        }
         mediaChunks.current = [];
       }
     }
