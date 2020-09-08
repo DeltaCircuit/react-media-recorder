@@ -24,7 +24,6 @@ type ReactMediaRecorderProps = {
   onStart?: () => void;
   blobPropertyBag?: BlobPropertyBag;
   mediaRecorderOptions?: MediaRecorderOptions | null;
-  deviceId?: string | null;
   customMediaStream?: MediaStream | null;
   stopStreamsOnStop?: boolean;
 };
@@ -64,7 +63,6 @@ export const ReactMediaRecorder = ({
   blobPropertyBag,
   screen = false,
   mediaRecorderOptions = null,
-  deviceId = null,
   customMediaStream = null,
   stopStreamsOnStop = true,
 }: ReactMediaRecorderProps) => {
@@ -78,15 +76,10 @@ export const ReactMediaRecorder = ({
 
   const getMediaStream = useCallback(async () => {
     setStatus("acquiring_media");
-    let requiredMedia: MediaStreamConstraints = {
+    const requiredMedia: MediaStreamConstraints = {
       audio: typeof audio === "boolean" ? !!audio : audio,
       video: typeof video === "boolean" ? !!video : video,
     };
-    if (deviceId) {
-      requiredMedia.video = {
-        deviceId: deviceId,
-      };
-    }
     try {
       if (customMediaStream) {
         mediaStream.current = customMediaStream;
