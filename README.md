@@ -1,6 +1,6 @@
 # react-media-recorder :o2: :video_camera: :microphone: :computer:
 
-`react-media-recorder` is a fully typed react component with render prop that can be used to:
+`react-media-recorder` is a fully typed react component with render prop, or a react hook, that can be used to:
 
 - Record audio/video
 - Record screen
@@ -42,6 +42,32 @@ const RecordView = () => (
 ```
 
 Since `react-media-recording` uses render prop, you can define what to render in the view. Just don't forget to wire the `startRecording`, `stopRecording` and `mediaBlobUrl` to your component.
+
+## Usage with react hooks
+
+```javascript
+import { useReactMediaRecorder } from "react-media-recorder";
+
+const RecordView = () => {
+  const {
+    status,
+    startRecording,
+    stopRecording,
+    mediaBlobUrl,
+  } = useReactMediaRecorder({ video: true });
+
+  return (
+    <div>
+      <p>{status}</p>
+      <button onClick={startRecording}>Start Recording</button>
+      <button onClick={stopRecording}>Stop Recording</button>
+      <video src={mediaBlobUrl} controls autoplay loop />
+    </div>
+  );
+};
+```
+
+The hook receives an object as argument with the same ReactMediaRecorder options / props (except the `render` function).
 
 ### Options / Props
 
@@ -167,9 +193,9 @@ A `function` which unmutes the audio tracks when invoked.
 
 #### mediaBlobUrl
 
-A `blob` url that can be wired to an `<audio />`, `<video />` or an `<a />` element.  
+A `blob` url that can be wired to an `<audio />`, `<video />` or an `<a />` element.
 
-#### clearBlobUrl  
+#### clearBlobUrl
 
 A `function` which clears the existing generated blob url (if any)
 

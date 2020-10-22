@@ -1,6 +1,6 @@
 import { ReactElement, useCallback, useEffect, useRef, useState } from "react";
 
-type ReactMediaRecorderRenderProps = {
+export type ReactMediaRecorderRenderProps = {
   error: string;
   muteAudio: () => void;
   unMuteAudio: () => void;
@@ -15,8 +15,7 @@ type ReactMediaRecorderRenderProps = {
   clearBlobUrl: () => void;
 };
 
-type ReactMediaRecorderProps = {
-  render: (props: ReactMediaRecorderRenderProps) => ReactElement;
+export type ReactMediaRecorderHookProps = {
   audio?: boolean | MediaTrackConstraints;
   video?: boolean | MediaTrackConstraints;
   screen?: boolean;
@@ -24,8 +23,11 @@ type ReactMediaRecorderProps = {
   blobPropertyBag?: BlobPropertyBag;
   mediaRecorderOptions?: MediaRecorderOptions | null;
 };
+export type ReactMediaRecorderProps = ReactMediaRecorderHookProps & {
+  render: (props: ReactMediaRecorderRenderProps) => ReactElement;
+};
 
-type StatusMessages =
+export type StatusMessages =
   | "media_aborted"
   | "permission_denied"
   | "no_specified_media_found"
@@ -40,7 +42,7 @@ type StatusMessages =
   | "stopping"
   | "stopped";
 
-enum RecorderErrors {
+export enum RecorderErrors {
   AbortError = "media_aborted",
   NotAllowedError = "permission_denied",
   NotFoundError = "no_specified_media_found",
@@ -51,15 +53,14 @@ enum RecorderErrors {
   NO_RECORDER = "recorder_error",
 }
 
-export const ReactMediaRecorder = ({
-  render,
+export function useReactMediaRecorder({
   audio = true,
   video = false,
   onStop = () => null,
   blobPropertyBag,
   screen = false,
   mediaRecorderOptions = null,
-}: ReactMediaRecorderProps) => {
+}: ReactMediaRecorderHookProps): ReactMediaRecorderRenderProps {
   const mediaRecorder = useRef<MediaRecorder | null>(null);
   const mediaChunks = useRef<Blob[]>([]);
   const mediaStream = useRef<MediaStream | null>(null);
@@ -226,7 +227,7 @@ export const ReactMediaRecorder = ({
     }
   };
 
-  return render({
+  return {
     error: RecorderErrors[error],
     muteAudio: () => muteAudio(true),
     unMuteAudio: () => muteAudio(false),
@@ -241,5 +242,8 @@ export const ReactMediaRecorder = ({
       ? new MediaStream(mediaStream.current.getVideoTracks())
       : null,
     clearBlobUrl: () => setMediaBlobUrl(null),
-  });
-};
+  };
+}
+
+export const ReactMediaRecorder = (props: ReactMediaRecorderProps) =>
+  props.render(useReactMediaRecorder(props));
