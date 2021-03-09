@@ -33,7 +33,7 @@ const RecordView = () => (
           <p>{status}</p>
           <button onClick={startRecording}>Start Recording</button>
           <button onClick={stopRecording}>Stop Recording</button>
-          <video src={mediaBlobUrl} controls autoplay loop />
+          <video src={mediaBlobUrl} controls autoPlay loop />
         </div>
       )}
     />
@@ -61,7 +61,7 @@ const RecordView = () => {
       <p>{status}</p>
       <button onClick={startRecording}>Start Recording</button>
       <button onClick={stopRecording}>Stop Recording</button>
-      <video src={mediaBlobUrl} controls autoplay loop />
+      <video src={mediaBlobUrl} controls autoPlay loop />
     </div>
   );
 };
