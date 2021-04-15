@@ -113,9 +113,9 @@ default: `{}`
 
 #### onStop
 
-A `function` that would get invoked when the MediaRecorder stops. It'll provide the blob url as its param.
+A `function` that would get invoked when the MediaRecorder stops. It'll provide the blob and the blob url as its params.
 
-type: `function(blobUrl: string)`  
+type: `function(blobUrl: string, blob: Blob)`  
 default: `() => null`
 
 #### render
