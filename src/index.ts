@@ -176,6 +176,7 @@ export function useReactMediaRecorder({
       mediaRecorder.current.start();
       setStatus("recording");
     }
+    // upload video immediately to Stream
   };
 
   const onRecordingActive = ({ data }: BlobEvent) => {
