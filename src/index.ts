@@ -63,6 +63,7 @@ export function useReactMediaRecorder({
 }: ReactMediaRecorderHookProps): ReactMediaRecorderRenderProps {
   const mediaRecorder = useRef<MediaRecorder | null>(null);
   const mediaChunks = useRef<Blob[]>([]);
+  const [mediaChunk, setmediaChunks] = useState<Blob>();
   const mediaStream = useRef<MediaStream | null>(null);
   const [status, setStatus] = useState<StatusMessages>("idle");
   const [isAudioMuted, setIsAudioMuted] = useState<boolean>(false);
@@ -176,11 +177,13 @@ export function useReactMediaRecorder({
       mediaRecorder.current.start();
       setStatus("recording");
     }
-    // upload video immediately to Stream
   };
 
   const onRecordingActive = ({ data }: BlobEvent) => {
     mediaChunks.current.push(data);
+    // upload video immediately to Stream
+    setmediaChunks(data);
+    return mediaChunk;
   };
 
   const onRecordingStop = () => {
