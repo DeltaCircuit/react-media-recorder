@@ -1,5 +1,21 @@
 import { ReactElement, useCallback, useEffect, useRef, useState } from "react";
 
+export interface VideoStorageStrategy {
+  /** Sets blob properties. This will be called only before the first call of storeChunk() 
+  after construction or reset(). */
+  setBlobProperties: (blobProperties: BlobPropertyBag) => void;
+  /** Handle recorded video chunk. */
+  storeChunk: (chunk: Blob) => void;
+  /** Informs this storage that the last chunk has been provided. */
+  stop: () => void;
+  /** Resets this storage so that a new video can be recorded. */
+  reset: () => void;
+  /** Gets the URL where the video is stored. */
+  getUrl: () => void;
+  /** If this storage stores all chunks in a merged Blob, returns it; otherwise returns undefined.*/
+  getBlob: () => void;
+}
+
 export type ReactMediaRecorderRenderProps = {
   error: string;
   muteAudio: () => void;
@@ -16,10 +32,11 @@ export type ReactMediaRecorderRenderProps = {
 };
 
 export type ReactMediaRecorderHookProps = {
+  VideoStorageStrategy?: boolean | VideoStorageStrategy;
   audio?: boolean | MediaTrackConstraints;
   video?: boolean | MediaTrackConstraints;
   screen?: boolean;
-  onStop?: (blobUrl: string, blob: Blob) => void;
+  onStop?: (blobUrl: string, blob: void) => void;
   blobPropertyBag?: BlobPropertyBag;
   mediaRecorderOptions?: MediaRecorderOptions | null;
 };
@@ -54,6 +71,7 @@ export enum RecorderErrors {
 }
 
 export function useReactMediaRecorder({
+  VideoStorageStrategy = false,
   audio = true,
   video = false,
   onStop = () => null,
@@ -63,7 +81,9 @@ export function useReactMediaRecorder({
 }: ReactMediaRecorderHookProps): ReactMediaRecorderRenderProps {
   const mediaRecorder = useRef<MediaRecorder | null>(null);
   const mediaChunks = useRef<Blob[]>([]);
-  const [mediaChunk, setmediaChunks] = useState<Blob>();
+  const [blobPropertiesState, setblobPropertiesState] = useState<boolean>(
+    false
+  );
   const mediaStream = useRef<MediaStream | null>(null);
   const [status, setStatus] = useState<StatusMessages>("idle");
   const [isAudioMuted, setIsAudioMuted] = useState<boolean>(false);
@@ -153,6 +173,24 @@ export function useReactMediaRecorder({
     }
   }, [audio, screen, video, getMediaStream, mediaRecorderOptions]);
 
+  // upload Media Recorder Handlers
+
+  const setBlobProperties = (blobProperties: BlobPropertyBag) => {};
+
+  const storeChunk = (chunk: Blob) => {};
+
+  const stop = () => {};
+
+  const reset = () => {};
+
+  const getUrl = (url: string): string => {
+    return url;
+  };
+
+  const getBlob = (blob: Blob): Blob => {
+    return blob;
+  };
+
   // Media Recorder Handlers
 
   const startRecording = async () => {
@@ -180,23 +218,27 @@ export function useReactMediaRecorder({
   };
 
   const onRecordingActive = ({ data }: BlobEvent) => {
-    mediaChunks.current.push(data);
-    // upload video immediately to Stream
-    setmediaChunks(data);
-    return mediaChunk;
+    if (!blobPropertiesState) {
+      const blobProperties: BlobPropertyBag = Object.assign(
+        { type: data.type },
+        blobPropertyBag ||
+          (video ? { type: "video/mp4" } : { type: "audio/wav" })
+      );
+
+      setBlobProperties(blobProperties);
+
+      setblobPropertiesState(true);
+    }
+
+    storeChunk(data);
   };
 
   const onRecordingStop = () => {
-    const [chunk] = mediaChunks.current;
-    const blobProperty: BlobPropertyBag = Object.assign(
-      { type: chunk.type },
-      blobPropertyBag || (video ? { type: "video/mp4" } : { type: "audio/wav" })
-    );
-    const blob = new Blob(mediaChunks.current, blobProperty);
-    const url = URL.createObjectURL(blob);
+    stop();
+    const url = getUrl();
     setStatus("stopped");
     setMediaBlobUrl(url);
-    onStop(url, blob);
+    onStop(url, getBlob());
   };
 
   const muteAudio = (mute: boolean) => {
@@ -226,7 +268,7 @@ export function useReactMediaRecorder({
         mediaRecorder.current.stop();
         mediaStream.current &&
           mediaStream.current.getTracks().forEach((track) => track.stop());
-        mediaChunks.current = [];
+        reset();
       }
     }
   };
