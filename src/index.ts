@@ -1,19 +1,23 @@
 import { ReactElement, useCallback, useEffect, useRef, useState } from "react";
 
 export interface VideoStorageStrategy {
-  /** Sets blob properties. This will be called only before the first call of storeChunk() 
-  after construction or reset(). */
-  setBlobProperties: (blobProperties: BlobPropertyBag) => void;
+  /** Sets blob properties. This will be called only before the first call of storeChunk() after construction or reset(). */
+  setBlobProperties(blobProperties: BlobPropertyBag): void;
+
   /** Handle recorded video chunk. */
-  storeChunk: (chunk: Blob) => void;
+  storeChunk(chunk: Blob): void;
+
   /** Informs this storage that the last chunk has been provided. */
-  stop: () => void;
+  stop(): void;
+
   /** Resets this storage so that a new video can be recorded. */
-  reset: () => void;
+  reset(): void;
+
   /** Gets the URL where the video is stored. */
-  getUrl: () => void;
+  getUrl(): void;
+
   /** If this storage stores all chunks in a merged Blob, returns it; otherwise returns undefined.*/
-  getBlob: () => void;
+  getBlob(): void;
 }
 
 export type ReactMediaRecorderRenderProps = {
@@ -70,6 +74,30 @@ export enum RecorderErrors {
   NO_RECORDER = "recorder_error",
 }
 
+
+
+class ObjectUrlStorageStrategy implements VideoStorageStrategy{
+  setBlobProperties(blobProperties: BlobPropertyBag): void {
+    throw new Error("Method not implemented.");
+  }
+  storeChunk(chunk: Blob): void {
+    throw new Error("Method not implemented.");
+  }
+  stop(): void {
+    throw new Error("Method not implemented.");
+  }
+  reset(): void {
+    throw new Error("Method not implemented.");
+  }
+  getUrl(): void {
+    throw new Error("Method not implemented.");
+  }
+  getBlob(): void {
+    throw new Error("Method not implemented.");
+  }
+}
+
+
 export function useReactMediaRecorder({
   VideoStorageStrategy = false,
   audio = true,
@@ -79,11 +107,9 @@ export function useReactMediaRecorder({
   screen = false,
   mediaRecorderOptions = null,
 }: ReactMediaRecorderHookProps): ReactMediaRecorderRenderProps {
+  const StorageStrategy =  new ObjectUrlStorageStrategy();
   const mediaRecorder = useRef<MediaRecorder | null>(null);
   const mediaChunks = useRef<Blob[]>([]);
-  const [blobPropertiesState, setblobPropertiesState] = useState<boolean>(
-    false
-  );
   const mediaStream = useRef<MediaStream | null>(null);
   const [status, setStatus] = useState<StatusMessages>("idle");
   const [isAudioMuted, setIsAudioMuted] = useState<boolean>(false);
@@ -173,24 +199,6 @@ export function useReactMediaRecorder({
     }
   }, [audio, screen, video, getMediaStream, mediaRecorderOptions]);
 
-  // upload Media Recorder Handlers
-
-  const setBlobProperties = (blobProperties: BlobPropertyBag) => {};
-
-  const storeChunk = (chunk: Blob) => {};
-
-  const stop = () => {};
-
-  const reset = () => {};
-
-  const getUrl = (url: string): string => {
-    return url;
-  };
-
-  const getBlob = (blob: Blob): Blob => {
-    return blob;
-  };
-
   // Media Recorder Handlers
 
   const startRecording = async () => {
@@ -218,27 +226,25 @@ export function useReactMediaRecorder({
   };
 
   const onRecordingActive = ({ data }: BlobEvent) => {
-    if (!blobPropertiesState) {
-      const blobProperties: BlobPropertyBag = Object.assign(
-        { type: data.type },
-        blobPropertyBag ||
-          (video ? { type: "video/mp4" } : { type: "audio/wav" })
-      );
+    let blobPropertiesState: Boolean = false
+    if(!blobPropertiesState) {
+        const blobProperties: BlobPropertyBag = Object.assign(
+            { type: data.type },
+            blobPropertyBag || (video ? { type: "video/mp4" } : { type: "audio/wav" }));
 
-      setBlobProperties(blobProperties);
-
-      setblobPropertiesState(true);
+            StorageStrategy.setBlobProperties(blobProperties);
+            blobPropertiesState = true;
     }
 
-    storeChunk(data);
+    StorageStrategy.storeChunk(data);
   };
 
   const onRecordingStop = () => {
-    stop();
-    const url = getUrl();
+    StorageStrategy.stop();
+    const url = StorageStrategy.getUrl();
     setStatus("stopped");
     setMediaBlobUrl(url);
-    onStop(url, getBlob());
+    onStop(url, StorageStrategy.getBlob());
   };
 
   const muteAudio = (mute: boolean) => {
@@ -268,7 +274,7 @@ export function useReactMediaRecorder({
         mediaRecorder.current.stop();
         mediaStream.current &&
           mediaStream.current.getTracks().forEach((track) => track.stop());
-        reset();
+          StorageStrategy.reset();
       }
     }
   };
