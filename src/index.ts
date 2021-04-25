@@ -97,8 +97,8 @@ class uploadStorageStrategy implements VideoUploadStorageStrategy {
 
 class localStorageStrategy implements VideoUploadStorageStrategy {
   blobProperties: any;
-  url: any;
-  blob: any;
+  url: String = "";
+  blob: Blob = new Blob();
   mediaChunks: Blob[] = [];
 
   setBlobProperties(blobProperties: BlobPropertyBag): void {
@@ -107,19 +107,19 @@ class localStorageStrategy implements VideoUploadStorageStrategy {
   storeChunk(chunk: Blob) {
     this.mediaChunks.push(chunk);
   }
-  stop(): String {
-    const blob = new Blob(this.mediaChunks, this.blobProperties);
-    const url = URL.createObjectURL(blob);
-    return url;
+  stop() {
+    let blob = new Blob(this.mediaChunks, this.blobProperties);
+    let url = URL.createObjectURL(blob);
+    this.url = url;
   }
   reset(): void {
     throw new Error("Method not implemented.");
   }
-  getUrl(url: String): String {
-    return url;
+  getUrl(): String {
+    return this.url;
   }
-  getBlob(blob: Blob): Blob {
-    return blob;
+  getBlob() {
+    return this.blob;
   }
 }
 class StorageStrategy {
