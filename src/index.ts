@@ -95,8 +95,8 @@ class uploadStorageStrategy implements VideoUploadStorageStrategy {
   getUrl(): String {
     return this.url;
   }
-  getBlob(blob: Blob): Blob {
-    return blob;
+  getBlob(): Blob {
+    return this.blob;
   }
 }
 
