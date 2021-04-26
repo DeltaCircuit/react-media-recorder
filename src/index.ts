@@ -1,5 +1,25 @@
 import { ReactElement, useCallback, useEffect, useRef, useState } from "react";
 
+export interface VideoUploadStorageStrategy {
+  /** Sets blob properties. This will be called only before the first call of storeChunk() after construction or reset(). */
+  setBlobProperties(blobProperties: BlobPropertyBag): void;
+
+  /** Handle recorded video chunk. */
+  storeChunk(chunk: Blob): void;
+
+  /** Informs this storage that the last chunk has been provided. */
+  stop(): void;
+
+  /** Resets this storage so that a new video can be recorded. */
+  reset(): void;
+
+  /** Gets the URL where the video is stored. */
+  getUrl(url: String): String;
+
+  /** If this storage stores all chunks in a merged Blob, returns it; otherwise returns undefined.*/
+  getBlob(blob: Blob): Blob;
+}
+
 export type ReactMediaRecorderRenderProps = {
   error: string;
   muteAudio: () => void;
@@ -16,10 +36,11 @@ export type ReactMediaRecorderRenderProps = {
 };
 
 export type ReactMediaRecorderHookProps = {
+  StorageStrategyOption?: () => void;
   audio?: boolean | MediaTrackConstraints;
   video?: boolean | MediaTrackConstraints;
   screen?: boolean;
-  onStop?: (blobUrl: string, blob: Blob) => void;
+  onStop?: (blobUrl: string, blob: void) => void;
   blobPropertyBag?: BlobPropertyBag;
   mediaRecorderOptions?: MediaRecorderOptions | null;
 };
@@ -53,7 +74,72 @@ export enum RecorderErrors {
   NO_RECORDER = "recorder_error",
 }
 
+class uploadStorageStrategy implements VideoUploadStorageStrategy {
+  blobProperties: any;
+  url: String = "";
+  blob: Blob = new Blob();
+  mediaChunks: Blob[] = [];
+
+  setBlobProperties(blobProperties: BlobPropertyBag): void {
+    this.blobProperties = blobProperties;
+  }
+  storeChunk(chunk: Blob): void {
+    throw new Error("Method not implemented.");
+  }
+  stop(): void {
+    throw new Error("Method not implemented.");
+  }
+  reset(): void {
+    throw new Error("Method not implemented.");
+  }
+  getUrl(): String {
+    return this.url;
+  }
+  getBlob(blob: Blob): Blob {
+    return blob;
+  }
+}
+
+class localStorageStrategy implements VideoUploadStorageStrategy {
+  blobProperties: any;
+  url: String = "";
+  blob: Blob = new Blob();
+  mediaChunks: Blob[] = [];
+
+  setBlobProperties(blobProperties: BlobPropertyBag): void {
+    this.blobProperties = blobProperties;
+  }
+  storeChunk(chunk: Blob) {
+    this.mediaChunks.push(chunk);
+  }
+  stop() {
+    let blob = new Blob(this.mediaChunks, this.blobProperties);
+    let url = URL.createObjectURL(blob);
+    this.url = url;
+  }
+  reset(): void {
+    this.mediaChunks = [];
+  }
+  getUrl(): String {
+    return this.url;
+  }
+  getBlob() {
+    return this.blob;
+  }
+}
+class StorageStrategy {
+  constructor(private StorageStrategy: any) {}
+
+  setBlobProperties = this.StorageStrategy.setBlobProperties();
+  storeChunk = this.StorageStrategy.storeChunk();
+  stop = this.StorageStrategy.stop();
+  reset = this.StorageStrategy.reset();
+  getUrl = this.StorageStrategy.getUrl("asdasd");
+  getBlob = this.StorageStrategy.getBlob();
+}
+
 export function useReactMediaRecorder({
+  StorageStrategyOption = () => {},
   audio = true,
   video = false,
   onStop = () => null,
@@ -61,6 +147,7 @@ export function useReactMediaRecorder({
   screen = false,
   mediaRecorderOptions = null,
 }: ReactMediaRecorderHookProps): ReactMediaRecorderRenderProps {
+  const storageStrategy = new StorageStrategy(new localStorageStrategy());
   const mediaRecorder = useRef<MediaRecorder | null>(null);
   const mediaChunks = useRef<Blob[]>([]);
   const mediaStream = useRef<MediaStream | null>(null);
@@ -179,20 +266,27 @@ export function useReactMediaRecorder({
   };
 
   const onRecordingActive = ({ data }: BlobEvent) => {
-    mediaChunks.current.push(data);
+    let blobPropertiesState: Boolean = false;
+    if (!blobPropertiesState) {
+      const blobProperties: BlobPropertyBag = Object.assign(
+        { type: data.type },
+        blobPropertyBag ||
+          (video ? { type: "video/mp4" } : { type: "audio/wav" })
+      );
+
+      storageStrategy.setBlobProperties(blobProperties);
+      blobPropertiesState = true;
+    }
+
+    storageStrategy.storeChunk(data);
   };
 
   const onRecordingStop = () => {
-    const [chunk] = mediaChunks.current;
-    const blobProperty: BlobPropertyBag = Object.assign(
-      { type: chunk.type },
-      blobPropertyBag || (video ? { type: "video/mp4" } : { type: "audio/wav" })
-    );
-    const blob = new Blob(mediaChunks.current, blobProperty);
-    const url = URL.createObjectURL(blob);
+    storageStrategy.stop();
+    const url = storageStrategy.getUrl();
     setStatus("stopped");
     setMediaBlobUrl(url);
-    onStop(url, blob);
+    onStop(url, storageStrategy.getBlob());
   };
 
   const muteAudio = (mute: boolean) => {
@@ -222,7 +316,7 @@ export function useReactMediaRecorder({
         mediaRecorder.current.stop();
         mediaStream.current &&
           mediaStream.current.getTracks().forEach((track) => track.stop());
-        mediaChunks.current = [];
+        storageStrategy.reset();
       }
     }
   };
