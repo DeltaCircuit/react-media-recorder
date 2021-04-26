@@ -75,8 +75,13 @@ export enum RecorderErrors {
 }
 
 class uploadStorageStrategy implements VideoUploadStorageStrategy {
+  blobProperties: any;
+  url: String = "";
+  blob: Blob = new Blob();
+  mediaChunks: Blob[] = [];
+
   setBlobProperties(blobProperties: BlobPropertyBag): void {
-    throw new Error("Method not implemented.");
+    this.blobProperties = blobProperties;
   }
   storeChunk(chunk: Blob): void {
     throw new Error("Method not implemented.");
@@ -88,7 +93,7 @@ class uploadStorageStrategy implements VideoUploadStorageStrategy {
     throw new Error("Method not implemented.");
   }
   getUrl(): String {
-    throw new Error("Method not implemented.");
+    return this.url;
   }
   getBlob(blob: Blob): Blob {
     return blob;
@@ -113,7 +118,7 @@ class localStorageStrategy implements VideoUploadStorageStrategy {
     this.url = url;
   }
   reset(): void {
-    throw new Error("Method not implemented.");
+    this.mediaChunks = [];
   }
   getUrl(): String {
     return this.url;
