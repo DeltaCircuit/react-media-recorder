@@ -74,33 +74,6 @@ export enum RecorderErrors {
   NO_RECORDER = "recorder_error",
 }
 
-class uploadStorageStrategy implements VideoStorage {
-  blobProperties: any;
-  url: string | null = null;
-  blob: Blob = new Blob();
-  mediaChunks: Blob[] = [];
-
-  setBlobProperties(blobProperties: BlobPropertyBag): void {
-    this.blobProperties = blobProperties;
-  }
-  storeChunk(chunk: Blob): void {
-    throw new Error("Method not implemented.");
-  }
-  stop(): void {
-    throw new Error("Method not implemented.");
-    // close terminate
-  }
-  reset(): void {
-    throw new Error("Method not implemented.");
-  }
-  getUrl(): string | null {
-    return this.url;
-  }
-  getBlob(): Blob {
-    return this.blob;
-  }
-}
-
 class ObjectUrlStorage implements VideoStorage {
   blobProperties: any;
   url: string | null = null;
