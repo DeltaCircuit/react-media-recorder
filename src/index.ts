@@ -2,22 +2,22 @@ import { ReactElement, useCallback, useEffect, useRef, useState } from "react";
 
 export interface VideoStorage {
   /** Sets blob properties. This will be called only before the first call of storeChunk() after construction or reset(). */
-  setBlobProperties(blobProperties: BlobPropertyBag): void;
+  setBlobProperties(blobProperties: BlobPropertyBag): void | null;
 
   /** Handle recorded video chunk. */
-  storeChunk(chunk: Blob): void;
+  storeChunk(chunk: Blob): void | null;
 
   /** Informs this storage that the last chunk has been provided. */
-  stop(): void;
+  stop(): void | null;
 
   /** Resets this storage so that a new video can be recorded. */
-  reset(): void;
+  reset(): void | null;
 
   /** Gets the URL where the video is stored. */
   getUrl(): string | null;
 
   /** If this storage stores all chunks in a merged Blob, returns it; otherwise returns undefined.*/
-  getBlob(): Blob;
+  getBlob(): Blob | null;
 }
 
 export type ReactMediaRecorderRenderProps = {
@@ -39,7 +39,7 @@ export type ReactMediaRecorderHookProps = {
   audio?: boolean | MediaTrackConstraints;
   video?: boolean | MediaTrackConstraints;
   screen?: boolean;
-  onStop?: (blobUrl: string | null, blob: Blob) => void;
+  onStop?: (blobUrl: string | null, blob: Blob | null) => void;
   blobPropertyBag?: BlobPropertyBag;
   mediaRecorderOptions?: MediaRecorderOptions | null;
   videoStorage?: VideoStorage;
@@ -83,15 +83,14 @@ class uploadStorageStrategy implements VideoStorage {
   setBlobProperties(blobProperties: BlobPropertyBag): void {
     this.blobProperties = blobProperties;
   }
-  storeChunk(chunk: Blob): void {
-    throw new Error("Method not implemented.");
+  storeChunk(chunk: Blob) {
+    return null;
   }
-  stop(): void {
-    throw new Error("Method not implemented.");
-    // close terminate
+  stop() {
+    return null;
   }
-  reset(): void {
-    throw new Error("Method not implemented.");
+  reset(){
+    return null;
   }
   getUrl(): string | null {
     return this.url;
@@ -113,13 +112,13 @@ class ObjectUrlStorage implements VideoStorage {
   storeChunk(chunk: Blob) {
     this.mediaChunks.push(chunk);
   }
-  stop() {
+  stop(){
     let blob = new Blob(this.mediaChunks, this.blobProperties);
     let url = URL.createObjectURL(blob);
     this.blob = blob;
     this.url = url;
   }
-  reset(): void {
+  reset() {
     this.mediaChunks = [];
   }
   getUrl(): string | null {
