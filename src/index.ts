@@ -100,7 +100,7 @@ class uploadStorageStrategy implements VideoStorage {
   }
 }
 
-class ObjectUrlStorage implements VideoStorage {
+export class ObjectUrlStorage implements VideoStorage {
   blobProperties: any;
   url: string | null = null;
   blob: Blob = new Blob();
