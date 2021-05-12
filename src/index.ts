@@ -251,8 +251,8 @@ export function useReactMediaRecorder({
   };
 
   const onRecordingActive = ({ data }: BlobEvent) => {
-    let blobPropertiesState: Boolean = false;
-    if (!blobPropertiesState) {
+    let blobPropertiesState = false;
+    if ((blobPropertiesState = false)) {
       const blobProperties: BlobPropertyBag = Object.assign(
         { type: data.type },
         blobPropertyBag ||
