@@ -74,7 +74,7 @@ export enum RecorderErrors {
   NO_RECORDER = "recorder_error",
 }
 
-class UploadStorageStrategy implements IVideoStorage {
+class UploadStorage implements IVideoStorage {
   blobProperties: any;
   url: string | null = null;
   blob: Blob = new Blob();
@@ -188,7 +188,8 @@ export function useReactMediaRecorder({
     }
 
     const checkConstraints = (mediaType: MediaTrackConstraints) => {
-      const supportedMediaConstraints = navigator.mediaDevices.getSupportedConstraints();
+      const supportedMediaConstraints =
+        navigator.mediaDevices.getSupportedConstraints();
       const unSupportedConstraints = Object.keys(mediaType).filter(
         (constraint) =>
           !(supportedMediaConstraints as { [key: string]: any })[constraint]
