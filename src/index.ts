@@ -146,10 +146,6 @@ export function useReactMediaRecorder({
         );
       }
     }
-
-    if (!mediaStream.current) {
-      getMediaStream();
-    }
   }, [audio, screen, video, getMediaStream, mediaRecorderOptions]);
 
   // Media Recorder Handlers
@@ -223,6 +219,7 @@ export function useReactMediaRecorder({
         mediaStream.current &&
           mediaStream.current.getTracks().forEach((track) => track.stop());
         mediaChunks.current = [];
+        mediaStream.current = null;
       }
     }
   };
