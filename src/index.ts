@@ -1,6 +1,6 @@
 import { ReactElement, useCallback, useEffect, useRef, useState } from "react";
 
-export interface VideoStorage {
+export interface IVideoStorage {
   /** Sets blob properties. This will be called only before the first call of storeChunk() after construction or reset(). */
   setBlobProperties(blobProperties: BlobPropertyBag): void;
 
@@ -17,7 +17,7 @@ export interface VideoStorage {
   getUrl(): string | null;
 
   /** If this storage stores all chunks in a merged Blob, returns it; otherwise returns undefined.*/
-  getBlob(): Blob;
+  getBlob(): Blob | undefined;
 }
 
 export type ReactMediaRecorderRenderProps = {
@@ -39,10 +39,10 @@ export type ReactMediaRecorderHookProps = {
   audio?: boolean | MediaTrackConstraints;
   video?: boolean | MediaTrackConstraints;
   screen?: boolean;
-  onStop?: (blobUrl: string | null, blob: Blob) => void;
+  onStop?: (blobUrl: string | null, blob: Blob | undefined) => void;
   blobPropertyBag?: BlobPropertyBag;
   mediaRecorderOptions?: MediaRecorderOptions | null;
-  videoStorage?: VideoStorage;
+  videoStorage?: IVideoStorage;
 };
 export type ReactMediaRecorderProps = ReactMediaRecorderHookProps & {
   render: (props: ReactMediaRecorderRenderProps) => ReactElement;
@@ -74,7 +74,27 @@ export enum RecorderErrors {
   NO_RECORDER = "recorder_error",
 }
 
-class ObjectUrlStorage implements VideoStorage {
+class UploadStorage implements IVideoStorage {
+  blobProperties: any;
+  url: string | null = null;
+  blob: Blob = new Blob();
+  mediaChunks: Blob[] = [];
+
+  setBlobProperties(blobProperties: BlobPropertyBag): void {
+    this.blobProperties = blobProperties;
+  }
+  storeChunk(chunk: Blob) {}
+  stop() {}
+  reset() {}
+  getUrl(): string | null {
+    return this.url;
+  }
+  getBlob(): Blob | undefined {
+    return this.blob;
+  }
+}
+
+export class ObjectUrlStorage implements IVideoStorage {
   blobProperties: any;
   url: string | null = null;
   blob: Blob = new Blob();
@@ -92,13 +112,13 @@ class ObjectUrlStorage implements VideoStorage {
     this.blob = blob;
     this.url = url;
   }
-  reset(): void {
+  reset() {
     this.mediaChunks = [];
   }
   getUrl(): string | null {
     return this.url;
   }
-  getBlob() {
+  getBlob(): Blob | undefined {
     return this.blob;
   }
 }
@@ -168,7 +188,8 @@ export function useReactMediaRecorder({
     }
 
     const checkConstraints = (mediaType: MediaTrackConstraints) => {
-      const supportedMediaConstraints = navigator.mediaDevices.getSupportedConstraints();
+      const supportedMediaConstraints =
+        navigator.mediaDevices.getSupportedConstraints();
       const unSupportedConstraints = Object.keys(mediaType).filter(
         (constraint) =>
           !(supportedMediaConstraints as { [key: string]: any })[constraint]
@@ -230,8 +251,8 @@ export function useReactMediaRecorder({
   };
 
   const onRecordingActive = ({ data }: BlobEvent) => {
-    let blobPropertiesState: Boolean = false;
-    if (!blobPropertiesState) {
+    let blobPropertiesState = false;
+    if ((blobPropertiesState = false)) {
       const blobProperties: BlobPropertyBag = Object.assign(
         { type: data.type },
         blobPropertyBag ||
