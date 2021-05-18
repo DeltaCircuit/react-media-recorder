@@ -74,26 +74,6 @@ export enum RecorderErrors {
   NO_RECORDER = "recorder_error",
 }
 
-class UploadStorage implements IVideoStorage {
-  blobProperties: any;
-  url: string | null = null;
-  blob: Blob = new Blob();
-  mediaChunks: Blob[] = [];
-
-  setBlobProperties(blobProperties: BlobPropertyBag): void {
-    this.blobProperties = blobProperties;
-  }
-  storeChunk(chunk: Blob) {}
-  stop() {}
-  reset() {}
-  getUrl(): string | null {
-    return this.url;
-  }
-  getBlob(): Blob | undefined {
-    return this.blob;
-  }
-}
-
 export class ObjectUrlStorage implements IVideoStorage {
   blobProperties: any;
   url: string | null = null;
