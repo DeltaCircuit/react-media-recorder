@@ -43,6 +43,7 @@ export type ReactMediaRecorderHookProps = {
   blobPropertyBag?: BlobPropertyBag;
   mediaRecorderOptions?: MediaRecorderOptions | null;
   videoStorage?: IVideoStorage;
+  timeslice?: number;
 };
 export type ReactMediaRecorderProps = ReactMediaRecorderHookProps & {
   render: (props: ReactMediaRecorderRenderProps) => ReactElement;
@@ -111,6 +112,7 @@ export function useReactMediaRecorder({
   screen = false,
   mediaRecorderOptions = null,
   videoStorage = new ObjectUrlStorage(),
+  timeslice = undefined
 }: ReactMediaRecorderHookProps): ReactMediaRecorderRenderProps {
   const mediaRecorder = useRef<MediaRecorder | null>(null);
   const mediaStream = useRef<MediaStream | null>(null);
@@ -226,7 +228,7 @@ export function useReactMediaRecorder({
         setError("NO_RECORDER");
         setStatus("idle");
       };
-      mediaRecorder.current.start();
+      mediaRecorder.current.start(timeslice);
       setStatus("recording");
     }
   };
