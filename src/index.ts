@@ -113,7 +113,6 @@ export function useReactMediaRecorder({
   videoStorage = new ObjectUrlStorage(),
 }: ReactMediaRecorderHookProps): ReactMediaRecorderRenderProps {
   const mediaRecorder = useRef<MediaRecorder | null>(null);
-  const mediaChunks = useRef<Blob[]>([]);
   const mediaStream = useRef<MediaStream | null>(null);
   const [status, setStatus] = useState<StatusMessages>("idle");
   const [isAudioMuted, setIsAudioMuted] = useState<boolean>(false);
