@@ -120,6 +120,8 @@ export function useReactMediaRecorder({
   const [mediaBlobUrl, setMediaBlobUrl] = useState<string | null>(null);
   const [error, setError] = useState<keyof typeof RecorderErrors>("NONE");
 
+  let blobPropertiesSet = false;
+
   const getMediaStream = useCallback(async () => {
     setStatus("acquiring_media");
     const requiredMedia: MediaStreamConstraints = {
@@ -231,8 +233,7 @@ export function useReactMediaRecorder({
   };
 
   const onRecordingActive = ({ data }: BlobEvent) => {
-    let blobPropertiesState = false;
-    if ((blobPropertiesState = false)) {
+    if (!blobPropertiesSet) {
       const blobProperties: BlobPropertyBag = Object.assign(
         { type: data.type },
         blobPropertyBag ||
@@ -240,7 +241,7 @@ export function useReactMediaRecorder({
       );
 
       videoStorage.setBlobProperties(blobProperties);
-      blobPropertiesState = true;
+      blobPropertiesSet = true;
     }
 
     videoStorage.storeChunk(data);
@@ -282,6 +283,7 @@ export function useReactMediaRecorder({
         mediaStream.current &&
           mediaStream.current.getTracks().forEach((track) => track.stop());
         videoStorage.reset();
+        blobPropertiesSet = false;
       }
     }
   };
