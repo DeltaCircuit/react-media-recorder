@@ -20,6 +20,7 @@ export type ReactMediaRecorderHookProps = {
   video?: boolean | MediaTrackConstraints;
   screen?: boolean;
   onStop?: (blobUrl: string, blob: Blob) => void;
+  onStart?: () => void;
   blobPropertyBag?: BlobPropertyBag;
   mediaRecorderOptions?: MediaRecorderOptions | null;
 };
@@ -57,6 +58,7 @@ export function useReactMediaRecorder({
   audio = true,
   video = false,
   onStop = () => null,
+  onStart = () => null,
   blobPropertyBag,
   screen = false,
   mediaRecorderOptions = null,
@@ -117,7 +119,8 @@ export function useReactMediaRecorder({
     }
 
     const checkConstraints = (mediaType: MediaTrackConstraints) => {
-      const supportedMediaConstraints = navigator.mediaDevices.getSupportedConstraints();
+      const supportedMediaConstraints =
+        navigator.mediaDevices.getSupportedConstraints();
       const unSupportedConstraints = Object.keys(mediaType).filter(
         (constraint) =>
           !(supportedMediaConstraints as { [key: string]: any })[constraint]
@@ -165,6 +168,7 @@ export function useReactMediaRecorder({
       mediaRecorder.current = new MediaRecorder(mediaStream.current);
       mediaRecorder.current.ondataavailable = onRecordingActive;
       mediaRecorder.current.onstop = onRecordingStop;
+      mediaRecorder.current.onstart = onRecordingStart;
       mediaRecorder.current.onerror = () => {
         setError("NO_RECORDER");
         setStatus("idle");
@@ -174,6 +178,9 @@ export function useReactMediaRecorder({
     }
   };
 
+  const onRecordingStart = () => {
+    onStart();
+  };
   const onRecordingActive = ({ data }: BlobEvent) => {
     mediaChunks.current.push(data);
   };
