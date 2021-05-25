@@ -8,11 +8,14 @@ export type ReactMediaRecorderRenderProps = {
   pauseRecording: () => void;
   resumeRecording: () => void;
   stopRecording: () => void;
+  cancelRecording: () => void;
   mediaBlobUrl: null | string;
+  mediaBlob: null | Blob;
   status: StatusMessages;
   isAudioMuted: boolean;
   previewStream: MediaStream | null;
   clearBlobUrl: () => void;
+  clearBlob: () => void;
 };
 
 export type ReactMediaRecorderHookProps = {
@@ -69,6 +72,7 @@ export function useReactMediaRecorder({
   const [status, setStatus] = useState<StatusMessages>("idle");
   const [isAudioMuted, setIsAudioMuted] = useState<boolean>(false);
   const [mediaBlobUrl, setMediaBlobUrl] = useState<string | null>(null);
+  const [mediaBlob, setMediaBlob] = useState<Blob | null>(null);
   const [error, setError] = useState<keyof typeof RecorderErrors>("NONE");
 
   const getMediaStream = useCallback(async () => {
@@ -195,6 +199,7 @@ export function useReactMediaRecorder({
     const url = URL.createObjectURL(blob);
     setStatus("stopped");
     setMediaBlobUrl(url);
+    setMediaBlob(blob);
     onStop(url, blob);
   };
 
@@ -231,6 +236,15 @@ export function useReactMediaRecorder({
     }
   };
 
+  const cancelRecording = () => {
+    mediaRecorder.current = null;
+    mediaStream.current = null;
+    mediaChunks.current = [];
+    setMediaBlobUrl(null);
+    setMediaBlob(null);
+    setStatus("stopped");
+  };
+
   return {
     error: RecorderErrors[error],
     muteAudio: () => muteAudio(true),
@@ -239,13 +253,16 @@ export function useReactMediaRecorder({
     pauseRecording,
     resumeRecording,
     stopRecording,
+    cancelRecording,
     mediaBlobUrl,
+    mediaBlob,
     status,
     isAudioMuted,
     previewStream: mediaStream.current
       ? new MediaStream(mediaStream.current.getVideoTracks())
       : null,
     clearBlobUrl: () => setMediaBlobUrl(null),
+    clearBlob: () => setMediaBlob(null),
   };
 }
 
