@@ -8,8 +8,7 @@
     "prepare": "npm run build"
   },
   "files": [
-    "lib",
-    "src"
+    "lib"
   ],
   "repository": {
     "type": "git",
