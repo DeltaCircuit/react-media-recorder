@@ -3,8 +3,11 @@
   "version": "1.4.0",
   "description": "A React component based on MediaRecorder() API to record audio/video streams",
   "main": "index.js",
+
+  "source": "src/index.ts",            
+  "module": "./lib",  
   "scripts": {
-    "build": "tsc",
+    "build": "microbundle",
     "prepare": "npm run build"
   },
   "files": [
