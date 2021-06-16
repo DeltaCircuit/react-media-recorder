@@ -4,7 +4,7 @@
   "description": "A React component based on MediaRecorder() API to record audio/video streams",
   "main": "index.js",
   "scripts": {
-    "build": "tsc && jsmin -o ./lib/index.js ./lib/index.js",
+    "build": "tsc",
     "prepare": "npm run build"
   },
   "files": [
