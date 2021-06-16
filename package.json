@@ -2,13 +2,9 @@
   "name": "react-media-recorder",
   "version": "1.4.0",
   "description": "A React component based on MediaRecorder() API to record audio/video streams",
-  "main": "lib/index.js",
-
-  "module": "lib/index.modern.js",
-  "source": "src/index.ts",
-
+  "main": "index.js",
   "scripts": {
-    "build": "microbundle",   
+    "build": "tsc",
     "prepare": "npm run build"
   },
   "files": [
@@ -42,7 +38,6 @@
     "@types/node": "^12.12.11",
     "@types/react": "^16.9.11",
     "jsmin": "^1.0.1",
-    "microbundle": "^0.13.3",
     "typescript": "^3.7.2"
   },
   "types": "./lib/index.d.ts"
