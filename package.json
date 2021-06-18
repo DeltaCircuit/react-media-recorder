@@ -6,7 +6,7 @@
   "source": "src/index.ts",
   "module": "./lib",
   "scripts": {
-    "build": "microbundle -i src/index.ts -o lib/index.js --no-pkg-main -f umd",
+    "build": "microbundle -i src/index.ts -o lib/index.js",
     "prepare": "npm run build"
   },
   "files": [
