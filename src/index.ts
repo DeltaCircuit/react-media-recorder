@@ -10,9 +10,6 @@ export interface IVideoStorage {
   /** Informs this storage that the last chunk has been provided. */
   stop(): void;
 
-  /** Resets this storage so that a new video can be recorded. */
-  reset(): void;
-
   /** Gets the URL where the video is stored. */
   getUrl(): string | null;
 
@@ -42,7 +39,7 @@ export type ReactMediaRecorderHookProps = {
   onStop?: (blobUrl: string | null, blob: Blob | undefined) => void;
   blobPropertyBag?: BlobPropertyBag;
   mediaRecorderOptions?: MediaRecorderOptions | null;
-  videoStorage?: IVideoStorage;
+  videoStorageFactory?: () => IVideoStorage;
   timeslice?: number;
 };
 export type ReactMediaRecorderProps = ReactMediaRecorderHookProps & {
@@ -93,9 +90,6 @@ export class ObjectUrlStorage implements IVideoStorage {
     this.blob = blob;
     this.url = url;
   }
-  reset() {
-    this.mediaChunks = [];
-  }
   getUrl(): string | null {
     return this.url;
   }
@@ -111,9 +105,10 @@ export function useReactMediaRecorder({
   blobPropertyBag,
   screen = false,
   mediaRecorderOptions = null,
-  videoStorage = new ObjectUrlStorage(),
+  videoStorageFactory = () => new ObjectUrlStorage(),
   timeslice = undefined
 }: ReactMediaRecorderHookProps): ReactMediaRecorderRenderProps {
+  const videoStorage = useRef<IVideoStorage | null>(null);
   const mediaRecorder = useRef<MediaRecorder | null>(null);
   const mediaStream = useRef<MediaStream | null>(null);
   const [status, setStatus] = useState<StatusMessages>("idle");
@@ -221,6 +216,11 @@ export function useReactMediaRecorder({
       if (isStreamEnded) {
         await getMediaStream();
       }
+
+      // Initialise new storage
+      videoStorage.current = videoStorageFactory();
+      blobPropertiesSet = false;
+
       mediaRecorder.current = new MediaRecorder(mediaStream.current);
       mediaRecorder.current.ondataavailable = onRecordingActive;
       mediaRecorder.current.onstop = onRecordingStop;
@@ -241,23 +241,19 @@ export function useReactMediaRecorder({
           (video ? { type: "video/mp4" } : { type: "audio/wav" })
       );
 
-      videoStorage.setBlobProperties(blobProperties);
+      videoStorage.current?.setBlobProperties(blobProperties);
       blobPropertiesSet = true;
     }
 
-    videoStorage.storeChunk(data);
+    videoStorage.current?.storeChunk(data);
   };
 
   const onRecordingStop = () => {
-    videoStorage.stop();
-    const url = videoStorage.getUrl();
+    videoStorage.current?.stop();
+    const url = videoStorage.current?.getUrl() ?? null;
     setStatus("stopped");
     setMediaBlobUrl(url);
-    onStop(url, videoStorage.getBlob());
-
-    // Reset the storage and reset blob properties on next video start
-    videoStorage.reset();
-    blobPropertiesSet = false;
+    onStop(url, videoStorage.current?.getBlob());
   };
 
   const muteAudio = (mute: boolean) => {
