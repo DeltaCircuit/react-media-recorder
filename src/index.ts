@@ -254,6 +254,10 @@ export function useReactMediaRecorder({
     setStatus("stopped");
     setMediaBlobUrl(url);
     onStop(url, videoStorage.getBlob());
+
+    // Reset the storage and reset blob properties on next video start
+    videoStorage.reset();
+    blobPropertiesSet = false;
   };
 
   const muteAudio = (mute: boolean) => {
@@ -283,8 +287,6 @@ export function useReactMediaRecorder({
         mediaRecorder.current.stop();
         mediaStream.current &&
           mediaStream.current.getTracks().forEach((track) => track.stop());
-        videoStorage.reset();
-        blobPropertiesSet = false;
       }
     }
   };
