@@ -136,6 +136,13 @@ Can be either a boolean value or a [MediaTrackConstraints](https://developer.moz
 type: `boolean` or `object`  
 default: `false`
 
+#### askPermissionOnMount
+
+A boolean value. If set to `true`, will ask media permission on mounting.
+
+type: `boolean`
+default: `false`
+
 ### Props available in the `render` function
 
 #### error
