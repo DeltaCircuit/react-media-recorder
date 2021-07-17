@@ -13,7 +13,6 @@ export type ReactMediaRecorderRenderProps = {
   isAudioMuted: boolean;
   previewStream: MediaStream | null;
   clearBlobUrl: () => void;
-  askPermissionOnMount?: boolean;
 };
 
 export type ReactMediaRecorderHookProps = {
