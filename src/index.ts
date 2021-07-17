@@ -13,6 +13,7 @@ export type ReactMediaRecorderRenderProps = {
   isAudioMuted: boolean;
   previewStream: MediaStream | null;
   clearBlobUrl: () => void;
+  askPermissionOnMount?: boolean;
 };
 
 export type ReactMediaRecorderHookProps = {
@@ -22,6 +23,7 @@ export type ReactMediaRecorderHookProps = {
   onStop?: (blobUrl: string, blob: Blob) => void;
   blobPropertyBag?: BlobPropertyBag;
   mediaRecorderOptions?: MediaRecorderOptions | null;
+  askPermissionOnMount?: boolean;
 };
 export type ReactMediaRecorderProps = ReactMediaRecorderHookProps & {
   render: (props: ReactMediaRecorderRenderProps) => ReactElement;
@@ -60,6 +62,7 @@ export function useReactMediaRecorder({
   blobPropertyBag,
   screen = false,
   mediaRecorderOptions = null,
+  askPermissionOnMount = false
 }: ReactMediaRecorderHookProps): ReactMediaRecorderRenderProps {
   const mediaRecorder = useRef<MediaRecorder | null>(null);
   const mediaChunks = useRef<Blob[]>([]);
@@ -147,10 +150,10 @@ export function useReactMediaRecorder({
       }
     }
 
-    if (!mediaStream.current) {
+    if (!mediaStream.current && askPermissionOnMount) {
       getMediaStream();
     }
-  }, [audio, screen, video, getMediaStream, mediaRecorderOptions]);
+  }, [audio, screen, video, getMediaStream, mediaRecorderOptions, askPermissionOnMount]);
 
   // Media Recorder Handlers
 
