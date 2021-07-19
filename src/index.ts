@@ -61,7 +61,7 @@ export function useReactMediaRecorder({
   blobPropertyBag,
   screen = false,
   mediaRecorderOptions = null,
-  askPermissionOnMount = false
+  askPermissionOnMount = false,
 }: ReactMediaRecorderHookProps): ReactMediaRecorderRenderProps {
   const mediaRecorder = useRef<MediaRecorder | null>(null);
   const mediaChunks = useRef<Blob[]>([]);
@@ -119,7 +119,8 @@ export function useReactMediaRecorder({
     }
 
     const checkConstraints = (mediaType: MediaTrackConstraints) => {
-      const supportedMediaConstraints = navigator.mediaDevices.getSupportedConstraints();
+      const supportedMediaConstraints =
+        navigator.mediaDevices.getSupportedConstraints();
       const unSupportedConstraints = Object.keys(mediaType).filter(
         (constraint) =>
           !(supportedMediaConstraints as { [key: string]: any })[constraint]
@@ -152,7 +153,21 @@ export function useReactMediaRecorder({
     if (!mediaStream.current && askPermissionOnMount) {
       getMediaStream();
     }
-  }, [audio, screen, video, getMediaStream, mediaRecorderOptions, askPermissionOnMount]);
+
+    return () => {
+      if (mediaStream.current) {
+        const tracks = mediaStream.current.getTracks();
+        tracks.forEach((track) => track.stop());
+      }
+    };
+  }, [
+    audio,
+    screen,
+    video,
+    getMediaStream,
+    mediaRecorderOptions,
+    askPermissionOnMount,
+  ]);
 
   // Media Recorder Handlers
 
