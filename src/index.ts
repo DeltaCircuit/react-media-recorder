@@ -41,7 +41,8 @@ export type StatusMessages =
   | "delayed_start"
   | "recording"
   | "stopping"
-  | "stopped";
+  | "stopped"
+  | "paused";
 
 export enum RecorderErrors {
   AbortError = "media_aborted",
@@ -223,11 +224,13 @@ export function useReactMediaRecorder({
 
   const pauseRecording = () => {
     if (mediaRecorder.current && mediaRecorder.current.state === "recording") {
+      setStatus("paused");
       mediaRecorder.current.pause();
     }
   };
   const resumeRecording = () => {
     if (mediaRecorder.current && mediaRecorder.current.state === "paused") {
+      setStatus("recording");
       mediaRecorder.current.resume();
     }
   };
