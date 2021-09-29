@@ -265,7 +265,12 @@ export function useReactMediaRecorder({
     previewAudioStream: mediaStream.current
       ? new MediaStream(mediaStream.current.getAudioTracks())
       : null,
-    clearBlobUrl: () => setMediaBlobUrl(null),
+    clearBlobUrl: () => {
+      if (mediaBlobUrl) {
+        URL.revokeObjectURL(mediaBlobUrl);
+      }
+      setMediaBlobUrl(null);
+    },
   };
 }
 
