@@ -12,6 +12,7 @@ export type ReactMediaRecorderRenderProps = {
   status: StatusMessages;
   isAudioMuted: boolean;
   previewStream: MediaStream | null;
+  previewAudioStream: MediaStream | null;
   clearBlobUrl: () => void;
 };
 
@@ -101,7 +102,7 @@ export function useReactMediaRecorder({
         mediaStream.current = stream;
       }
       setStatus("idle");
-    } catch (error) {
+    } catch (error: any) {
       setError(error.name);
       setStatus("idle");
     }
