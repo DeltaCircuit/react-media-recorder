@@ -204,7 +204,7 @@ A `blob` url that can be wired to an `<audio />`, `<video />` or an `<a />` elem
 
 #### clearBlobUrl
 
-A `function` which clears the existing generated blob url (if any)
+A `function` which clears the existing generated blob url (if any) and resets the workflow to its initial `idle` state.
 
 #### isMuted
 

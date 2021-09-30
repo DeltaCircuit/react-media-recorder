@@ -270,6 +270,7 @@ export function useReactMediaRecorder({
         URL.revokeObjectURL(mediaBlobUrl);
       }
       setMediaBlobUrl(null);
+      setStatus('idle');
     },
   };
 }
