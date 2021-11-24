@@ -216,6 +216,12 @@ export function useReactMediaRecorder({
     onStop(url, blob);
   };
 
+  const onRecordingError = () => {
+    setError("NO_RECORDER");
+    setStatus("idle");
+    onError();
+  }
+
   const muteAudio = (mute: boolean) => {
     setIsAudioMuted(mute);
     if (mediaStream.current) {
@@ -225,11 +231,6 @@ export function useReactMediaRecorder({
     }
   };
 
-  const onRecordingError = () => {
-    setError("NO_RECORDER");
-    setStatus("idle");
-    onError();
-  }
 
   const pauseRecording = () => {
     if (mediaRecorder.current && mediaRecorder.current.state === "recording") {
