@@ -20,6 +20,7 @@ export type ReactMediaRecorderHookProps = {
   audio?: boolean | MediaTrackConstraints;
   video?: boolean | MediaTrackConstraints;
   screen?: boolean;
+  onError?: () => void;
   onStop?: (blobUrl: string, blob: Blob) => void;
   blobPropertyBag?: BlobPropertyBag;
   mediaRecorderOptions?: MediaRecorderOptions | null;
@@ -59,6 +60,7 @@ export enum RecorderErrors {
 export function useReactMediaRecorder({
   audio = true,
   video = false,
+  onError = () => null,
   onStop = () => null,
   blobPropertyBag,
   screen = false,
@@ -191,10 +193,7 @@ export function useReactMediaRecorder({
       mediaRecorder.current = new MediaRecorder(mediaStream.current);
       mediaRecorder.current.ondataavailable = onRecordingActive;
       mediaRecorder.current.onstop = onRecordingStop;
-      mediaRecorder.current.onerror = () => {
-        setError("NO_RECORDER");
-        setStatus("idle");
-      };
+      mediaRecorder.current.onerror = onRecordingError;
       mediaRecorder.current.start();
       setStatus("recording");
     }
@@ -225,6 +224,12 @@ export function useReactMediaRecorder({
         .forEach((audioTrack) => (audioTrack.enabled = !mute));
     }
   };
+
+  const onRecordingError = () => {
+    setError("NO_RECORDER");
+    setStatus("idle");
+    onError();
+  }
 
   const pauseRecording = () => {
     if (mediaRecorder.current && mediaRecorder.current.state === "recording") {
