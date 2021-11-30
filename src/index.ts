@@ -188,6 +188,11 @@ export function useReactMediaRecorder({
       if (isStreamEnded) {
         await getMediaStream();
       }
+
+      // User blocked the permissions (getMediaStream errored out)
+      if (!mediaStream.current.active) {
+        return;
+      }
       mediaRecorder.current = new MediaRecorder(mediaStream.current);
       mediaRecorder.current.ondataavailable = onRecordingActive;
       mediaRecorder.current.onstop = onRecordingStop;
@@ -273,7 +278,7 @@ export function useReactMediaRecorder({
         URL.revokeObjectURL(mediaBlobUrl);
       }
       setMediaBlobUrl(null);
-      setStatus('idle');
+      setStatus("idle");
     },
   };
 }
