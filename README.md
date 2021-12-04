@@ -118,6 +118,13 @@ A `function` that would get invoked when the MediaRecorder stops. It'll provide 
 type: `function(blobUrl: string, blob: Blob)`  
 default: `() => null`
 
+#### onError
+
+A `function` that would get invoked if an error occurred.
+
+type: `function`  
+default: `() => null`
+
 #### render
 
 A `function` which accepts an object containing fields: `status`, `startRecording`, `stopRecording` and`mediaBlob`. This function would return a react element/component.
