@@ -1,6 +1,6 @@
 import { ReactElement, useCallback, useEffect, useRef, useState } from "react";
 
-type ReactMediaRecorderRenderProps = {
+export type ReactMediaRecorderRenderProps = {
   error: string;
   muteAudio: () => void;
   unMuteAudio: () => void;
@@ -12,11 +12,11 @@ type ReactMediaRecorderRenderProps = {
   status: StatusMessages;
   isAudioMuted: boolean;
   previewStream: MediaStream | null;
+  previewAudioStream: MediaStream | null;
   clearBlobUrl: () => void;
 };
 
-type ReactMediaRecorderProps = {
-  render: (props: ReactMediaRecorderRenderProps) => ReactElement;
+export type ReactMediaRecorderHookProps = {
   audio?: boolean | MediaTrackConstraints;
   video?: boolean | MediaTrackConstraints;
   screen?: boolean;
@@ -26,9 +26,13 @@ type ReactMediaRecorderProps = {
   mediaRecorderOptions?: MediaRecorderOptions | null;
   customMediaStream?: MediaStream | null;
   stopStreamsOnStop?: boolean;
+  askPermissionOnMount?: boolean;
+};
+export type ReactMediaRecorderProps = ReactMediaRecorderHookProps & {
+  render: (props: ReactMediaRecorderRenderProps) => ReactElement;
 };
 
-type StatusMessages =
+export type StatusMessages =
   | "media_aborted"
   | "permission_denied"
   | "no_specified_media_found"
@@ -41,9 +45,10 @@ type StatusMessages =
   | "delayed_start"
   | "recording"
   | "stopping"
-  | "stopped";
+  | "stopped"
+  | "paused";
 
-enum RecorderErrors {
+export enum RecorderErrors {
   AbortError = "media_aborted",
   NotAllowedError = "permission_denied",
   NotFoundError = "no_specified_media_found",
@@ -54,8 +59,7 @@ enum RecorderErrors {
   NO_RECORDER = "recorder_error",
 }
 
-export const ReactMediaRecorder = ({
-  render,
+export function useReactMediaRecorder({
   audio = true,
   video = false,
   onStop = () => null,
@@ -65,7 +69,8 @@ export const ReactMediaRecorder = ({
   mediaRecorderOptions = null,
   customMediaStream = null,
   stopStreamsOnStop = true,
-}: ReactMediaRecorderProps) => {
+  askPermissionOnMount = false,
+}: ReactMediaRecorderHookProps): ReactMediaRecorderRenderProps {
   const mediaRecorder = useRef<MediaRecorder | null>(null);
   const mediaChunks = useRef<Blob[]>([]);
   const mediaStream = useRef<MediaStream | null>(null);
@@ -88,6 +93,9 @@ export const ReactMediaRecorder = ({
         const stream = (await window.navigator.mediaDevices.getDisplayMedia({
           video: video || true,
         })) as MediaStream;
+        stream.getVideoTracks()[0].addEventListener("ended", () => {
+          stopRecording();
+        });
         if (audio) {
           const audioStream = await window.navigator.mediaDevices.getUserMedia({
             audio,
@@ -105,7 +113,7 @@ export const ReactMediaRecorder = ({
         mediaStream.current = stream;
       }
       setStatus("idle");
-    } catch (error) {
+    } catch (error: any) {
       setError(error.name);
       setStatus("idle");
     }
@@ -124,7 +132,8 @@ export const ReactMediaRecorder = ({
     }
 
     const checkConstraints = (mediaType: MediaTrackConstraints) => {
-      const supportedMediaConstraints = navigator.mediaDevices.getSupportedConstraints();
+      const supportedMediaConstraints =
+        navigator.mediaDevices.getSupportedConstraints();
       const unSupportedConstraints = Object.keys(mediaType).filter(
         (constraint) =>
           !(supportedMediaConstraints as { [key: string]: any })[constraint]
@@ -154,10 +163,24 @@ export const ReactMediaRecorder = ({
       }
     }
 
-    if (!mediaStream.current) {
+    if (!mediaStream.current && askPermissionOnMount) {
       getMediaStream();
     }
-  }, [audio, screen, video, getMediaStream, mediaRecorderOptions]);
+
+    return () => {
+      if (mediaStream.current) {
+        const tracks = mediaStream.current.getTracks();
+        tracks.forEach((track) => track.stop());
+      }
+    };
+  }, [
+    audio,
+    screen,
+    video,
+    getMediaStream,
+    mediaRecorderOptions,
+    askPermissionOnMount,
+  ]);
 
   // Media Recorder Handlers
 
@@ -172,6 +195,11 @@ export const ReactMediaRecorder = ({
         .some((track) => track.readyState === "ended");
       if (isStreamEnded) {
         await getMediaStream();
+      }
+
+      // User blocked the permissions (getMediaStream errored out)
+      if (!mediaStream.current.active) {
+        return;
       }
       mediaRecorder.current = new MediaRecorder(mediaStream.current);
       mediaRecorder.current.ondataavailable = onRecordingActive;
@@ -218,11 +246,13 @@ export const ReactMediaRecorder = ({
 
   const pauseRecording = () => {
     if (mediaRecorder.current && mediaRecorder.current.state === "recording") {
+      setStatus("paused");
       mediaRecorder.current.pause();
     }
   };
   const resumeRecording = () => {
     if (mediaRecorder.current && mediaRecorder.current.state === "paused") {
+      setStatus("recording");
       mediaRecorder.current.resume();
     }
   };
@@ -241,7 +271,7 @@ export const ReactMediaRecorder = ({
     }
   };
 
-  return render({
+  return {
     error: RecorderErrors[error],
     muteAudio: () => muteAudio(true),
     unMuteAudio: () => muteAudio(false),
@@ -255,6 +285,18 @@ export const ReactMediaRecorder = ({
     previewStream: mediaStream.current
       ? new MediaStream(mediaStream.current.getVideoTracks())
       : null,
-    clearBlobUrl: () => setMediaBlobUrl(null),
-  });
-};
+    previewAudioStream: mediaStream.current
+      ? new MediaStream(mediaStream.current.getAudioTracks())
+      : null,
+    clearBlobUrl: () => {
+      if (mediaBlobUrl) {
+        URL.revokeObjectURL(mediaBlobUrl);
+      }
+      setMediaBlobUrl(null);
+      setStatus("idle");
+    },
+  };
+}
+
+export const ReactMediaRecorder = (props: ReactMediaRecorderProps) =>
+  props.render(useReactMediaRecorder(props));
