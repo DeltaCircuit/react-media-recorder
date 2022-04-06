@@ -193,7 +193,7 @@ export function useReactMediaRecorder({
       if (!mediaStream.current.active) {
         return;
       }
-      mediaRecorder.current = new MediaRecorder(mediaStream.current);
+      mediaRecorder.current = new MediaRecorder(mediaStream.current, mediaRecorderOptions || undefined);
       mediaRecorder.current.ondataavailable = onRecordingActive;
       mediaRecorder.current.onstop = onRecordingStop;
       mediaRecorder.current.onerror = () => {
