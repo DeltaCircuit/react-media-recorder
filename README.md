@@ -49,12 +49,8 @@ Since `react-media-recording` uses render prop, you can define what to render in
 import { useReactMediaRecorder } from "react-media-recorder";
 
 const RecordView = () => {
-  const {
-    status,
-    startRecording,
-    stopRecording,
-    mediaBlobUrl,
-  } = useReactMediaRecorder({ video: true });
+  const { status, startRecording, stopRecording, mediaBlobUrl } =
+    useReactMediaRecorder({ video: true });
 
   return (
     <div>
@@ -104,6 +100,10 @@ if there's only `audio` is enabled,
 }
 ```
 
+#### customMediaStream  
+
+A media stream object itself (optional)
+
 #### mediaRecorderOptions
 
 An optional options object that will be passed to `MediaRecorder`. Please note that if you specify the MIME type via either `audio` or `video` prop _and_ through this `mediaRecorderOptions`, the `mediaRecorderOptions` have higher precedence.
@@ -111,12 +111,23 @@ An optional options object that will be passed to `MediaRecorder`. Please note t
 type: `object`  
 default: `{}`
 
+#### onStart
+
+A `function` that would get invoked when the MediaRecorder starts.
+
+type: `function()`  
+default: `() => null`
+
 #### onStop
 
 A `function` that would get invoked when the MediaRecorder stops. It'll provide the blob and the blob url as its params.
 
 type: `function(blobUrl: string, blob: Blob)`  
-default: `() => null`
+default: `() => null`  
+
+#### stopStreamsOnStop
+
+Whether to stop all streams on stop. By default, its `true`
 
 #### render
 
