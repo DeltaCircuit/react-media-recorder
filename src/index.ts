@@ -21,8 +21,11 @@ export type ReactMediaRecorderHookProps = {
   video?: boolean | MediaTrackConstraints;
   screen?: boolean;
   onStop?: (blobUrl: string, blob: Blob) => void;
+  onStart?: () => void;
   blobPropertyBag?: BlobPropertyBag;
   mediaRecorderOptions?: MediaRecorderOptions | null;
+  customMediaStream?: MediaStream | null;
+  stopStreamsOnStop?: boolean;
   askPermissionOnMount?: boolean;
 };
 export type ReactMediaRecorderProps = ReactMediaRecorderHookProps & {
@@ -60,9 +63,12 @@ export function useReactMediaRecorder({
   audio = true,
   video = false,
   onStop = () => null,
+  onStart = () => null,
   blobPropertyBag,
   screen = false,
   mediaRecorderOptions = null,
+  customMediaStream = null,
+  stopStreamsOnStop = true,
   askPermissionOnMount = false,
 }: ReactMediaRecorderHookProps): ReactMediaRecorderRenderProps {
   const mediaRecorder = useRef<MediaRecorder | null>(null);
@@ -80,7 +86,9 @@ export function useReactMediaRecorder({
       video: typeof video === "boolean" ? !!video : video,
     };
     try {
-      if (screen) {
+      if (customMediaStream) {
+        mediaStream.current = customMediaStream;
+      } else if (screen) {
         //@ts-ignore
         const stream = (await window.navigator.mediaDevices.getDisplayMedia({
           video: video || true,
@@ -196,6 +204,7 @@ export function useReactMediaRecorder({
       mediaRecorder.current = new MediaRecorder(mediaStream.current);
       mediaRecorder.current.ondataavailable = onRecordingActive;
       mediaRecorder.current.onstop = onRecordingStop;
+      mediaRecorder.current.onstart = onRecordingStart;
       mediaRecorder.current.onerror = () => {
         setError("NO_RECORDER");
         setStatus("idle");
@@ -207,6 +216,10 @@ export function useReactMediaRecorder({
 
   const onRecordingActive = ({ data }: BlobEvent) => {
     mediaChunks.current.push(data);
+  };
+
+  const onRecordingStart = () => {
+    onStart();
   };
 
   const onRecordingStop = () => {
@@ -249,8 +262,10 @@ export function useReactMediaRecorder({
       if (mediaRecorder.current.state !== "inactive") {
         setStatus("stopping");
         mediaRecorder.current.stop();
-        mediaStream.current &&
-          mediaStream.current.getTracks().forEach((track) => track.stop());
+        if (stopStreamsOnStop) {
+          mediaStream.current &&
+            mediaStream.current.getTracks().forEach((track) => track.stop());
+        }
         mediaChunks.current = [];
       }
     }
