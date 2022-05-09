@@ -122,7 +122,6 @@ export function useReactMediaRecorder({
       }
       setStatus("idle");
     } catch (error: any) {
-      console.log(error);
       setError(error.name);
       setStatus("idle");
     }
@@ -135,7 +134,7 @@ export function useReactMediaRecorder({
 
     if (screen) {
       if (!window.navigator.mediaDevices.getDisplayMedia) {
-        throw new Error("This browser doesn\"t support screen capturing");
+        throw new Error("This browser doesn\'t support screen capturing");
       }
     }
 
@@ -151,8 +150,7 @@ export function useReactMediaRecorder({
         console.error(
           `The constraints ${unSupportedConstraints.join(
             ",",
-          // eslint-disable-next-line max-len
-          )} doesn"t support on this browser. Please check your ReactMediaRecorder component.`,
+          )} doesn't support on this browser. Please check your ReactMediaRecorder component.`,
         );
       }
     };
@@ -167,7 +165,7 @@ export function useReactMediaRecorder({
     if (mediaRecorderOptions && mediaRecorderOptions.mimeType) {
       if (!MediaRecorder.isTypeSupported(mediaRecorderOptions.mimeType)) {
         console.error(
-          `The specified MIME type you supplied for MediaRecorder doesn"t support this browser`,
+          `The specified MIME type you supplied for MediaRecorder doesn't support this browser`,
         );
       }
     }
