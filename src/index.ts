@@ -1,4 +1,6 @@
+import { register, MediaRecorder as ExtendableMediaRecorder, IMediaRecorder } from "extendable-media-recorder";
 import { ReactElement, useCallback, useEffect, useRef, useState } from "react";
+import { connect } from 'extendable-media-recorder-wav-encoder';
 
 export type ReactMediaRecorderRenderProps = {
   error: string;
@@ -8,7 +10,7 @@ export type ReactMediaRecorderRenderProps = {
   pauseRecording: () => void;
   resumeRecording: () => void;
   stopRecording: () => void;
-  mediaBlobUrl: null | string;
+  mediaBlobUrl: undefined | string;
   status: StatusMessages;
   isAudioMuted: boolean;
   previewStream: MediaStream | null;
@@ -23,7 +25,7 @@ export type ReactMediaRecorderHookProps = {
   onStop?: (blobUrl: string, blob: Blob) => void;
   onStart?: () => void;
   blobPropertyBag?: BlobPropertyBag;
-  mediaRecorderOptions?: MediaRecorderOptions | null;
+  mediaRecorderOptions?: MediaRecorderOptions | undefined;
   customMediaStream?: MediaStream | null;
   stopStreamsOnStop?: boolean;
   askPermissionOnMount?: boolean;
@@ -66,18 +68,25 @@ export function useReactMediaRecorder({
   onStart = () => null,
   blobPropertyBag,
   screen = false,
-  mediaRecorderOptions = null,
+  mediaRecorderOptions = undefined,
   customMediaStream = null,
   stopStreamsOnStop = true,
   askPermissionOnMount = false,
 }: ReactMediaRecorderHookProps): ReactMediaRecorderRenderProps {
-  const mediaRecorder = useRef<MediaRecorder | null>(null);
+  const mediaRecorder = useRef<IMediaRecorder | null >(null);
   const mediaChunks = useRef<Blob[]>([]);
   const mediaStream = useRef<MediaStream | null>(null);
   const [status, setStatus] = useState<StatusMessages>("idle");
   const [isAudioMuted, setIsAudioMuted] = useState<boolean>(false);
-  const [mediaBlobUrl, setMediaBlobUrl] = useState<string | null>(null);
+  const [mediaBlobUrl, setMediaBlobUrl] = useState<string | undefined>(undefined);
   const [error, setError] = useState<keyof typeof RecorderErrors>("NONE");
+
+  useEffect(() => {
+    const setup = async () => {
+      await register(await connect());
+    };
+    setup();
+  }, []);
 
   const getMediaStream = useCallback(async () => {
     setStatus("acquiring_media");
@@ -89,7 +98,6 @@ export function useReactMediaRecorder({
       if (customMediaStream) {
         mediaStream.current = customMediaStream;
       } else if (screen) {
-        //@ts-ignore
         const stream = (await window.navigator.mediaDevices.getDisplayMedia({
           video: video || true,
         })) as MediaStream;
@@ -108,12 +116,13 @@ export function useReactMediaRecorder({
         mediaStream.current = stream;
       } else {
         const stream = await window.navigator.mediaDevices.getUserMedia(
-          requiredMedia
+          requiredMedia,
         );
         mediaStream.current = stream;
       }
       setStatus("idle");
     } catch (error: any) {
+      console.log(error);
       setError(error.name);
       setStatus("idle");
     }
@@ -125,9 +134,8 @@ export function useReactMediaRecorder({
     }
 
     if (screen) {
-      //@ts-ignore
       if (!window.navigator.mediaDevices.getDisplayMedia) {
-        throw new Error("This browser doesn't support screen capturing");
+        throw new Error("This browser doesn\"t support screen capturing");
       }
     }
 
@@ -136,14 +144,15 @@ export function useReactMediaRecorder({
         navigator.mediaDevices.getSupportedConstraints();
       const unSupportedConstraints = Object.keys(mediaType).filter(
         (constraint) =>
-          !(supportedMediaConstraints as { [key: string]: any })[constraint]
+          !(supportedMediaConstraints as { [key: string]: any })[constraint],
       );
 
       if (unSupportedConstraints.length > 0) {
         console.error(
           `The constraints ${unSupportedConstraints.join(
-            ","
-          )} doesn't support on this browser. Please check your ReactMediaRecorder component.`
+            ",",
+          // eslint-disable-next-line max-len
+          )} doesn"t support on this browser. Please check your ReactMediaRecorder component.`,
         );
       }
     };
@@ -158,7 +167,7 @@ export function useReactMediaRecorder({
     if (mediaRecorderOptions && mediaRecorderOptions.mimeType) {
       if (!MediaRecorder.isTypeSupported(mediaRecorderOptions.mimeType)) {
         console.error(
-          `The specified MIME type you supplied for MediaRecorder doesn't support this browser`
+          `The specified MIME type you supplied for MediaRecorder doesn"t support this browser`,
         );
       }
     }
@@ -170,7 +179,7 @@ export function useReactMediaRecorder({
     return () => {
       if (mediaStream.current) {
         const tracks = mediaStream.current.getTracks();
-        tracks.forEach((track) => track.stop());
+        tracks.forEach((track) => track.clone().stop());
       }
     };
   }, [
@@ -201,7 +210,9 @@ export function useReactMediaRecorder({
       if (!mediaStream.current.active) {
         return;
       }
-      mediaRecorder.current = new MediaRecorder(mediaStream.current, mediaRecorderOptions || undefined);
+      mediaRecorder.current = new ExtendableMediaRecorder(
+        mediaStream.current, mediaRecorderOptions || undefined,
+      );
       mediaRecorder.current.ondataavailable = onRecordingActive;
       mediaRecorder.current.onstop = onRecordingStop;
       mediaRecorder.current.onstart = onRecordingStart;
@@ -226,7 +237,7 @@ export function useReactMediaRecorder({
     const [chunk] = mediaChunks.current;
     const blobProperty: BlobPropertyBag = Object.assign(
       { type: chunk.type },
-      blobPropertyBag || (video ? { type: "video/mp4" } : { type: "audio/wav" })
+      blobPropertyBag || (video ? { type: "video/mp4" } : { type: "audio/wav" }),
     );
     const blob = new Blob(mediaChunks.current, blobProperty);
     const url = URL.createObjectURL(blob);
@@ -282,17 +293,17 @@ export function useReactMediaRecorder({
     mediaBlobUrl,
     status,
     isAudioMuted,
-    previewStream: mediaStream.current
-      ? new MediaStream(mediaStream.current.getVideoTracks())
-      : null,
-    previewAudioStream: mediaStream.current
-      ? new MediaStream(mediaStream.current.getAudioTracks())
-      : null,
+    previewStream: mediaStream.current ?
+      new MediaStream(mediaStream.current.getVideoTracks()) :
+      null,
+    previewAudioStream: mediaStream.current ?
+      new MediaStream(mediaStream.current.getAudioTracks()) :
+      null,
     clearBlobUrl: () => {
       if (mediaBlobUrl) {
         URL.revokeObjectURL(mediaBlobUrl);
       }
-      setMediaBlobUrl(null);
+      setMediaBlobUrl(undefined);
       setStatus("idle");
     },
   };
