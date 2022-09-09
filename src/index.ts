@@ -331,11 +331,11 @@ export function useReactMediaRecorder({
       if (mediaRecorder.current.state !== "inactive") {
         setStatus("stopping");
         mediaRecorder.current.stop();
-        if (stopStreamsOnStop) {
-          mediaStream.current &&
-            mediaStream.current.getTracks().forEach((track) => track.stop());
-        }
       }
+    }
+    if (stopStreamsOnStop) {
+      mediaStream.current &&
+        mediaStream.current.getTracks().forEach((track) => track.stop());
     }
   };
 
