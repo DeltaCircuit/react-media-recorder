@@ -39,7 +39,7 @@ export type ReactMediaRecorderHookProps = {
   audio?: boolean | MediaTrackConstraints;
   video?: boolean | MediaTrackConstraints;
   screen?: boolean;
-  onStop?: (blobUrl: string | null, blob: Blob | undefined) => void;
+  onStop?: (blobUrl: string | undefined, blob: Blob | undefined) => void;
   onStart?: () => void;
   blobPropertyBag?: BlobPropertyBag;
   mediaRecorderOptions?: MediaRecorderOptions | undefined;
@@ -298,7 +298,7 @@ export function useReactMediaRecorder({
 
   const onRecordingStop = () => {
     videoStorage.current?.stop();
-    const url = videoStorage.current?.getUrl() ?? null;
+    const url = videoStorage.current?.getUrl() ?? undefined;
     setStatus("stopped");
     setMediaBlobUrl(url);
     onStop(url, videoStorage.current?.getBlob());
