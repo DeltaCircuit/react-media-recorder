@@ -49,12 +49,8 @@ Since `react-media-recording` uses render prop, you can define what to render in
 import { useReactMediaRecorder } from "react-media-recorder";
 
 const RecordView = () => {
-  const {
-    status,
-    startRecording,
-    stopRecording,
-    mediaBlobUrl,
-  } = useReactMediaRecorder({ video: true });
+  const { status, startRecording, stopRecording, mediaBlobUrl } =
+    useReactMediaRecorder({ video: true });
 
   return (
     <div>
@@ -104,6 +100,10 @@ if there's only `audio` is enabled,
 }
 ```
 
+#### customMediaStream  
+
+A media stream object itself (optional)
+
 #### mediaRecorderOptions
 
 An optional options object that will be passed to `MediaRecorder`. Please note that if you specify the MIME type via either `audio` or `video` prop _and_ through this `mediaRecorderOptions`, the `mediaRecorderOptions` have higher precedence.
@@ -111,12 +111,23 @@ An optional options object that will be passed to `MediaRecorder`. Please note t
 type: `object`  
 default: `{}`
 
+#### onStart
+
+A `function` that would get invoked when the MediaRecorder starts.
+
+type: `function()`  
+default: `() => null`
+
 #### onStop
 
 A `function` that would get invoked when the MediaRecorder stops. It'll provide the blob and the blob url as its params.
 
 type: `function(blobUrl: string, blob: Blob)`  
-default: `() => null`
+default: `() => null`  
+
+#### stopStreamsOnStop
+
+Whether to stop all streams on stop. By default, its `true`
 
 #### render
 
@@ -134,6 +145,13 @@ A `boolean` value. Lets you to record your current screen. Not all browsers woul
 Can be either a boolean value or a [MediaTrackConstraints](https://developer.mozilla.org/en-US/docs/Web/API/MediaTrackConstraints) object.
 
 type: `boolean` or `object`  
+default: `false`
+
+#### askPermissionOnMount
+
+A boolean value. If set to `true`, will ask media permission on mounting.
+
+type: `boolean`
 default: `false`
 
 ### Props available in the `render` function
@@ -197,7 +215,7 @@ A `blob` url that can be wired to an `<audio />`, `<video />` or an `<a />` elem
 
 #### clearBlobUrl
 
-A `function` which clears the existing generated blob url (if any)
+A `function` which clears the existing generated blob url (if any) and resets the workflow to its initial `idle` state.
 
 #### isMuted
 
@@ -233,6 +251,10 @@ const App = () => (
   />
 );
 ```
+
+#### previewAudioStream
+
+If you want access to the live audio stream for use in sound visualisations, you can use this _stream_ as your audio source and extract data from it using the [AudioContext](https://developer.mozilla.org/en-US/docs/Web/API/AudioContext) and [AnalyzerNode](https://developer.mozilla.org/en-US/docs/Web/API/AnalyserNode) features of the Web Audio API. Some javascript examples of how to do this can be found [here](https://developer.mozilla.org/en-US/docs/Web/API/Web_Audio_API/Visualizations_with_Web_Audio_API).
 
 ## Contributing
 
