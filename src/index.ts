@@ -1,6 +1,6 @@
-import { register, MediaRecorder as ExtendableMediaRecorder, IMediaRecorder } from "extendable-media-recorder";
-import { ReactElement, useCallback, useEffect, useRef, useState } from "react";
-import { connect } from 'extendable-media-recorder-wav-encoder';
+import {IMediaRecorder, MediaRecorder as ExtendableMediaRecorder, register,} from "extendable-media-recorder";
+import {ReactElement, useCallback, useEffect, useRef, useState} from "react";
+import {connect} from "extendable-media-recorder-wav-encoder";
 
 export type ReactMediaRecorderRenderProps = {
   error: string;
@@ -73,19 +73,33 @@ export function useReactMediaRecorder({
   stopStreamsOnStop = true,
   askPermissionOnMount = false,
 }: ReactMediaRecorderHookProps): ReactMediaRecorderRenderProps {
-  const mediaRecorder = useRef<IMediaRecorder | null >(null);
+  const mediaRecorder = useRef<IMediaRecorder | null>(null);
   const mediaChunks = useRef<Blob[]>([]);
   const mediaStream = useRef<MediaStream | null>(null);
   const [status, setStatus] = useState<StatusMessages>("idle");
   const [isAudioMuted, setIsAudioMuted] = useState<boolean>(false);
-  const [mediaBlobUrl, setMediaBlobUrl] = useState<string | undefined>(undefined);
+  const [mediaBlobUrl, setMediaBlobUrl] = useState<string | undefined>(
+    undefined
+  );
   const [error, setError] = useState<keyof typeof RecorderErrors>("NONE");
+  const [init, setInit] = useState(false);
 
   useEffect(() => {
+    // avoid re-registering the encoder
+    if (init) {
+      return;
+    }
+
     const setup = async () => {
-      await register(await connect());
+      try {
+        await register(await connect());
+      } catch (e) {
+        //
+      }
     };
+
     setup();
+    setInit(true);
   }, []);
 
   const getMediaStream = useCallback(async () => {
@@ -115,10 +129,9 @@ export function useReactMediaRecorder({
         }
         mediaStream.current = stream;
       } else {
-        const stream = await window.navigator.mediaDevices.getUserMedia(
-          requiredMedia,
+        mediaStream.current = await window.navigator.mediaDevices.getUserMedia(
+            requiredMedia
         );
-        mediaStream.current = stream;
       }
       setStatus("idle");
     } catch (error: any) {
@@ -134,7 +147,7 @@ export function useReactMediaRecorder({
 
     if (screen) {
       if (!window.navigator.mediaDevices.getDisplayMedia) {
-        throw new Error("This browser doesn\'t support screen capturing");
+        throw new Error("This browser doesn't support screen capturing");
       }
     }
 
@@ -143,14 +156,14 @@ export function useReactMediaRecorder({
         navigator.mediaDevices.getSupportedConstraints();
       const unSupportedConstraints = Object.keys(mediaType).filter(
         (constraint) =>
-          !(supportedMediaConstraints as { [key: string]: any })[constraint],
+          !(supportedMediaConstraints as { [key: string]: any })[constraint]
       );
 
       if (unSupportedConstraints.length > 0) {
         console.error(
           `The constraints ${unSupportedConstraints.join(
-            ",",
-          )} doesn't support on this browser. Please check your ReactMediaRecorder component.`,
+            ","
+          )} doesn't support on this browser. Please check your ReactMediaRecorder component.`
         );
       }
     };
@@ -165,7 +178,7 @@ export function useReactMediaRecorder({
     if (mediaRecorderOptions && mediaRecorderOptions.mimeType) {
       if (!MediaRecorder.isTypeSupported(mediaRecorderOptions.mimeType)) {
         console.error(
-          `The specified MIME type you supplied for MediaRecorder doesn't support this browser`,
+          `The specified MIME type you supplied for MediaRecorder doesn't support this browser`
         );
       }
     }
@@ -209,7 +222,8 @@ export function useReactMediaRecorder({
         return;
       }
       mediaRecorder.current = new ExtendableMediaRecorder(
-        mediaStream.current, mediaRecorderOptions || undefined,
+        mediaStream.current,
+        mediaRecorderOptions || undefined
       );
       mediaRecorder.current.ondataavailable = onRecordingActive;
       mediaRecorder.current.onstop = onRecordingStop;
@@ -235,7 +249,7 @@ export function useReactMediaRecorder({
     const [chunk] = mediaChunks.current;
     const blobProperty: BlobPropertyBag = Object.assign(
       { type: chunk.type },
-      blobPropertyBag || (video ? { type: "video/mp4" } : { type: "audio/wav" }),
+      blobPropertyBag || (video ? { type: "video/mp4" } : { type: "audio/wav" })
     );
     const blob = new Blob(mediaChunks.current, blobProperty);
     const url = URL.createObjectURL(blob);
@@ -291,12 +305,12 @@ export function useReactMediaRecorder({
     mediaBlobUrl,
     status,
     isAudioMuted,
-    previewStream: mediaStream.current ?
-      new MediaStream(mediaStream.current.getVideoTracks()) :
-      null,
-    previewAudioStream: mediaStream.current ?
-      new MediaStream(mediaStream.current.getAudioTracks()) :
-      null,
+    previewStream: mediaStream.current
+      ? new MediaStream(mediaStream.current.getVideoTracks())
+      : null,
+    previewAudioStream: mediaStream.current
+      ? new MediaStream(mediaStream.current.getAudioTracks())
+      : null,
     clearBlobUrl: () => {
       if (mediaBlobUrl) {
         URL.revokeObjectURL(mediaBlobUrl);

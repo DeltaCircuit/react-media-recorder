@@ -1,6 +1,6 @@
 {
   "name": "react-media-recorder",
-  "version": "1.6.6",
+  "version": "1.6.7",
   "description": "A React component based on MediaRecorder() API to record audio/video streams",
   "main": "index.js",
   "scripts": {
@@ -12,7 +12,7 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/giridharangm/react-media-recorder.git"
+    "url": "git+https://github.com/hipeople/react-media-recorder.git"
   },
   "keywords": [
     "react",
@@ -30,17 +30,17 @@
   "author": "Giridharan GM",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/giridharangm/react-media-recorder/issues"
+    "url": "https://github.com/hipeople/react-media-recorder/issues"
   },
-  "homepage": "https://github.com/giridharangm/react-media-recorder#readme",
+  "homepage": "https://github.com/hipeople/react-media-recorder#readme",
   "devDependencies": {
-    "@types/react": "^16.9.11",
+    "@types/react": "^18.0.28",
     "jsmin": "^1.0.1",
-    "typescript": "^4.4.3"
+    "typescript": "^5.0.2"
   },
   "types": "./lib/index.d.ts",
   "dependencies": {
-    "extendable-media-recorder": "^6.6.5",
-    "extendable-media-recorder-wav-encoder": "^7.0.68"
+    "extendable-media-recorder": "^7.1.9",
+    "extendable-media-recorder-wav-encoder": "^7.0.85"
   }
 }
