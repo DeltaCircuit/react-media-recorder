@@ -1,6 +1,6 @@
-import { register, MediaRecorder as ExtendableMediaRecorder, IMediaRecorder } from "extendable-media-recorder";
+import { MediaRecorder as ExtendableMediaRecorder, IMediaRecorder } from "extendable-media-recorder";
 import { ReactElement, useCallback, useEffect, useRef, useState } from "react";
-import { connect } from 'extendable-media-recorder-wav-encoder';
+import { connect, disconnect } from 'extendable-media-recorder-wav-encoder';
 
 export type ReactMediaRecorderRenderProps = {
   error: string;
@@ -82,10 +82,9 @@ export function useReactMediaRecorder({
   const [error, setError] = useState<keyof typeof RecorderErrors>("NONE");
 
   useEffect(() => {
-    const setup = async () => {
-      await register(await connect());
-    };
-    setup();
+    connect().then(messagePort => {
+      return disconnect(messagePort);
+    })
   }, []);
 
   const getMediaStream = useCallback(async () => {
