@@ -83,8 +83,9 @@ export function useReactMediaRecorder({
 
   useEffect(() => {
     connect().then(messagePort => {
-      register(messagePort);
-      return () => disconnect(messagePort);
+      register(messagePort).then(()=>{
+        return () => disconnect(messagePort);
+      });
     })
   }, []);
 
