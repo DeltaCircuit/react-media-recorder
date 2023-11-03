@@ -1,4 +1,4 @@
-import { MediaRecorder as ExtendableMediaRecorder, IMediaRecorder } from "extendable-media-recorder";
+import { register, MediaRecorder as ExtendableMediaRecorder, IMediaRecorder } from "extendable-media-recorder";
 import { ReactElement, useCallback, useEffect, useRef, useState } from "react";
 import { connect, disconnect } from 'extendable-media-recorder-wav-encoder';
 
@@ -83,7 +83,8 @@ export function useReactMediaRecorder({
 
   useEffect(() => {
     connect().then(messagePort => {
-      return disconnect(messagePort);
+      register(messagePort);
+      return () => disconnect(messagePort);
     })
   }, []);
 
