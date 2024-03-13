@@ -1,6 +1,6 @@
-import { register, MediaRecorder as ExtendableMediaRecorder, IMediaRecorder } from "extendable-media-recorder";
-import { ReactElement, useCallback, useEffect, useRef, useState } from "react";
-import { connect } from 'extendable-media-recorder-wav-encoder';
+import {register, MediaRecorder as ExtendableMediaRecorder, IMediaRecorder} from "extendable-media-recorder";
+import {ReactElement, useCallback, useEffect, useRef, useState} from "react";
+import {connect} from 'extendable-media-recorder-wav-encoder';
 
 export type ReactMediaRecorderRenderProps = {
   error: string;
@@ -62,31 +62,36 @@ export enum RecorderErrors {
 }
 
 export function useReactMediaRecorder({
-  audio = true,
-  video = false,
-  onStop = () => null,
-  onStart = () => null,
-  blobPropertyBag,
-  screen = false,
-  mediaRecorderOptions = undefined,
-  customMediaStream = null,
-  stopStreamsOnStop = true,
-  askPermissionOnMount = false,
-}: ReactMediaRecorderHookProps): ReactMediaRecorderRenderProps {
-  const mediaRecorder = useRef<IMediaRecorder | null >(null);
+                                        audio = true,
+                                        video = false,
+                                        onStop = () => null,
+                                        onStart = () => null,
+                                        blobPropertyBag,
+                                        screen = false,
+                                        mediaRecorderOptions = undefined,
+                                        customMediaStream = null,
+                                        stopStreamsOnStop = true,
+                                        askPermissionOnMount = false,
+                                      }: ReactMediaRecorderHookProps): ReactMediaRecorderRenderProps {
+  const mediaRecorder = useRef<IMediaRecorder | null>(null);
   const mediaChunks = useRef<Blob[]>([]);
   const mediaStream = useRef<MediaStream | null>(null);
   const [status, setStatus] = useState<StatusMessages>("idle");
   const [isAudioMuted, setIsAudioMuted] = useState<boolean>(false);
   const [mediaBlobUrl, setMediaBlobUrl] = useState<string | undefined>(undefined);
   const [error, setError] = useState<keyof typeof RecorderErrors>("NONE");
+  const [isRegistered, setIsRegistered] = useState(false);
 
   useEffect(() => {
-    const setup = async () => {
-      await register(await connect());
-    };
-    setup();
-  }, []);
+    if (isRegistered) {
+      return
+    }
+
+    connect()
+      .then(c => register(c))
+      .then(() => setIsRegistered(true))
+      .catch(e => console.log(e))
+  }, [isRegistered, setIsRegistered, register, connect]);
 
   const getMediaStream = useCallback(async () => {
     setStatus("acquiring_media");
@@ -223,7 +228,7 @@ export function useReactMediaRecorder({
     }
   };
 
-  const onRecordingActive = ({ data }: BlobEvent) => {
+  const onRecordingActive = ({data}: BlobEvent) => {
     mediaChunks.current.push(data);
   };
 
@@ -234,8 +239,8 @@ export function useReactMediaRecorder({
   const onRecordingStop = () => {
     const [chunk] = mediaChunks.current;
     const blobProperty: BlobPropertyBag = Object.assign(
-      { type: chunk.type },
-      blobPropertyBag || (video ? { type: "video/mp4" } : { type: "audio/wav" }),
+      {type: chunk.type},
+      blobPropertyBag || (video ? {type: "video/mp4"} : {type: "audio/wav"}),
     );
     const blob = new Blob(mediaChunks.current, blobProperty);
     const url = URL.createObjectURL(blob);
@@ -273,7 +278,7 @@ export function useReactMediaRecorder({
         mediaRecorder.current.stop();
         if (stopStreamsOnStop) {
           mediaStream.current &&
-            mediaStream.current.getTracks().forEach((track) => track.stop());
+          mediaStream.current.getTracks().forEach((track) => track.stop());
         }
         mediaChunks.current = [];
       }
