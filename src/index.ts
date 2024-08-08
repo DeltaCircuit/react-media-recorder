@@ -22,6 +22,7 @@ export type ReactMediaRecorderHookProps = {
   audio?: boolean | MediaTrackConstraints;
   video?: boolean | MediaTrackConstraints;
   screen?: boolean;
+  selfBrowserSurface?: SelfBrowserSurface;
   onStop?: (blobUrl: string, blob: Blob) => void;
   onStart?: () => void;
   blobPropertyBag?: BlobPropertyBag;
@@ -33,6 +34,17 @@ export type ReactMediaRecorderHookProps = {
 export type ReactMediaRecorderProps = ReactMediaRecorderHookProps & {
   render: (props: ReactMediaRecorderRenderProps) => ReactElement;
 };
+
+/**
+ * Experimental (optional).
+ * An enumerated value specifying whether the browser should allow the user to select the current tab for capture.
+ * This helps to avoid the "infinite hall of mirrors" effect experienced when a video conferencing app inadvertently shares its own display.
+ * Possible values are include, which hints that the browser should include the current tab in the choices offered for capture,
+ * and exclude, which hints that it should be excluded.
+ * A default value is not mandated by the spec.
+ * See specs at: https://developer.mozilla.org/en-US/docs/Web/API/MediaDevices/getDisplayMedia#selfbrowsersurface
+ */
+export type SelfBrowserSurface = undefined | 'include' | 'exclude';
 
 export type StatusMessages =
   | "media_aborted"
@@ -64,6 +76,7 @@ export enum RecorderErrors {
 export function useReactMediaRecorder({
   audio = true,
   video = false,
+  selfBrowserSurface = undefined,
   onStop = () => null,
   onStart = () => null,
   blobPropertyBag,
@@ -100,6 +113,8 @@ export function useReactMediaRecorder({
       } else if (screen) {
         const stream = (await window.navigator.mediaDevices.getDisplayMedia({
           video: video || true,
+          // @ts-ignore experimental feature, useful for Chrome
+          selfBrowserSurface,
         })) as MediaStream;
         stream.getVideoTracks()[0].addEventListener("ended", () => {
           stopRecording();
