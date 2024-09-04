@@ -161,7 +161,7 @@ export function useReactMediaRecorder({
   }, [audio, video, screen]);
 
   useEffect(() => {
-    if (!window.MediaRecorder) {
+    if (!window.MediaRecorder && (screen || audio)) {
       throw new Error("Unsupported Browser");
     }
 
