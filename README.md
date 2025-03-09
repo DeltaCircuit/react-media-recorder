@@ -71,19 +71,19 @@ The hook receives an object as argument with the same ReactMediaRecorder options
 
 Can be either a boolean value or a [MediaTrackConstraints](https://developer.mozilla.org/en-US/docs/Web/API/MediaTrackConstraints) object.
 
-type: `boolean` or `object`  
+type: `boolean` or `object`
 default: `true`
 
 #### blobPropertyBag
 
-[From MDN](https://developer.mozilla.org/en-US/docs/Web/API/Blob/Blob):  
+[From MDN](https://developer.mozilla.org/en-US/docs/Web/API/Blob/Blob):
 An optional `BlobPropertyBag` dictionary which may specify the following two attributes (for the `mediaBlob`):
 
 - `type`, that represents the MIME type of the content of the array that will be put in the blob.
 - `endings`, with a default value of "transparent", that specifies how strings containing the line ending character \n are to be written out. It is one of the two values: "native", meaning that line ending characters are changed to match host OS filesystem convention, or "transparent", meaning that endings are stored in the blob without change
 
-type: `object`  
-default:  
+type: `object`
+default:
 if `video` is enabled,
 
 ```
@@ -100,7 +100,7 @@ if there's only `audio` is enabled,
 }
 ```
 
-#### customMediaStream  
+#### customMediaStream
 
 A media stream object itself (optional)
 
@@ -108,22 +108,22 @@ A media stream object itself (optional)
 
 An optional options object that will be passed to `MediaRecorder`. Please note that if you specify the MIME type via either `audio` or `video` prop _and_ through this `mediaRecorderOptions`, the `mediaRecorderOptions` have higher precedence.
 
-type: `object`  
+type: `object`
 default: `{}`
 
 #### onStart
 
 A `function` that would get invoked when the MediaRecorder starts.
 
-type: `function()`  
+type: `function()`
 default: `() => null`
 
 #### onStop
 
 A `function` that would get invoked when the MediaRecorder stops. It'll provide the blob and the blob url as its params.
 
-type: `function(blobUrl: string, blob: Blob)`  
-default: `() => null`  
+type: `function(blobUrl: string, blob: Blob)`
+default: `() => null`
 
 #### stopStreamsOnStop
 
@@ -133,7 +133,7 @@ Whether to stop all streams on stop. By default, its `true`
 
 A `function` which accepts an object containing fields: `status`, `startRecording`, `stopRecording` and`mediaBlob`. This function would return a react element/component.
 
-type: `function`  
+type: `function`
 default: `() => null`
 
 #### screen
@@ -144,12 +144,19 @@ A `boolean` value. Lets you to record your current screen. Not all browsers woul
 
 Can be either a boolean value or a [MediaTrackConstraints](https://developer.mozilla.org/en-US/docs/Web/API/MediaTrackConstraints) object.
 
-type: `boolean` or `object`  
+type: `boolean` or `object`
 default: `false`
 
 #### askPermissionOnMount
 
 A boolean value. If set to `true`, will ask media permission on mounting.
+
+type: `boolean`
+default: `false`
+
+#### preferCurrentTab
+
+A boolean value. If set to `true`, the browser will offer the current tab as the most prominent capture source, i.e. as a separate "This Tab" option in the "Choose what to share" options presented to the user.
 
 type: `boolean`
 default: `false`
