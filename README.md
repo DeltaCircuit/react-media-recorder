@@ -154,6 +154,13 @@ A boolean value. If set to `true`, will ask media permission on mounting.
 type: `boolean`
 default: `false`
 
+#### selfBrowserSurface
+
+An enumerated value specifying whether the browser should allow the user to select the current tab for capture. Possible values are `include`, which hints that the browser should include the current tab in the choices offered for capture, and `exclude`, which hints that it should be excluded.
+
+type: `undefined` | `'include'` | `'exclude'`;
+default: `undefined`
+
 ### Props available in the `render` function
 
 #### error
