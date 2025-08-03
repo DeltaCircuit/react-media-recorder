@@ -27,6 +27,7 @@ export type ReactMediaRecorderHookProps = {
   video?: boolean | MediaTrackConstraints;
   screen?: boolean;
   selfBrowserSurface?: SelfBrowserSurface;
+  preferCurrentTab?: PreferCurrentTab,
   onStop?: (blobUrl: string, blob: Blob) => void;
   onStart?: () => void;
   blobPropertyBag?: BlobPropertyBag;
@@ -49,6 +50,14 @@ export type ReactMediaRecorderProps = ReactMediaRecorderHookProps & {
  * See specs at: https://developer.mozilla.org/en-US/docs/Web/API/MediaDevices/getDisplayMedia#selfbrowsersurface
  */
 export type SelfBrowserSurface = undefined | 'include' | 'exclude';
+
+/**
+ * Experimental (optional).
+ * A boolean; a value of true instructs the browser to offer the current tab as the most prominent capture source, i.e. as a separate "This Tab" option in the "Choose what to share" options presented to the user.
+ * This is useful as many app types generally just want to share the current tab.
+ * See specs at: https://developer.mozilla.org/en-US/docs/Web/API/MediaDevices/getDisplayMedia#prefercurrenttab
+ */
+export type PreferCurrentTab = true | false;
 
 export type StatusMessages =
     | "media_aborted"
@@ -81,6 +90,7 @@ export function useReactMediaRecorder({
   audio = true,
   video = false,
   selfBrowserSurface = undefined,
+  preferCurrentTab = false,
   onStop = () => null,
   onStart = () => null,
   blobPropertyBag,
@@ -133,6 +143,7 @@ export function useReactMediaRecorder({
           video: video || true,
           // @ts-ignore experimental feature, useful for Chrome
           selfBrowserSurface,
+          preferCurrentTab
         })) as MediaStream;
         stream.getVideoTracks()[0].addEventListener("ended", () => {
           stopRecording();
